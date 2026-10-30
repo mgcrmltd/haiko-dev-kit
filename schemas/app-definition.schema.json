@@ -1,0 +1,1673 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mgcrm-haiko-portal.azurewebsites.net/api/v1/schemas/app-definition.schema.json",
+  "title": "Haiko app definition",
+  "$ref": "#/definitions/HaikoAppDefinition",
+  "definitions": {
+    "HaikoAppDefinition": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "D365 hko_haikoapp record ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "App display name"
+        },
+        "theme": {
+          "$ref": "#/definitions/HaikoTheme",
+          "description": "Visual theming"
+        },
+        "auth": {
+          "$ref": "#/definitions/HaikoAuthConfig",
+          "description": "Auth configuration (B2C tenant, scopes, etc.)"
+        },
+        "navigation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoNavItem"
+          },
+          "description": "Main navigation items (side menu / tab bar)"
+        },
+        "screens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoScreen"
+          },
+          "description": "All screen definitions (lists, forms, records)"
+        },
+        "workflows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoWorkflow"
+          },
+          "description": "Multi-step workflow definitions"
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoEndpoint"
+          },
+          "description": "All endpoint definitions (where submissions go)"
+        },
+        "plugins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoPluginLock"
+          },
+          "description": "Plugins compiled into this app, one version each (Feature #1544). Every HaikoPluginRef in the definition must name a plugin listed here."
+        },
+        "dashboardWidgets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoPluginRef"
+          },
+          "description": "Plugin \"widget\" slots shown on the dashboard, in order"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "theme",
+        "auth",
+        "navigation",
+        "screens",
+        "workflows",
+        "endpoints"
+      ],
+      "additionalProperties": false,
+      "description": "Top-level app definition. This is the complete output of the Metadata Export API (`GET /api/export/{appId}`).\n\nOne of these exists per customer app."
+    },
+    "HaikoTheme": {
+      "type": "object",
+      "properties": {
+        "primaryColor": {
+          "type": "string",
+          "description": "Primary brand colour (hex, e.g., \"#1E40AF\")"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "description": "Secondary/accent colour"
+        },
+        "backgroundColor": {
+          "type": "string",
+          "description": "Background colour"
+        },
+        "surfaceColor": {
+          "type": "string",
+          "description": "Surface colour (cards, modals)"
+        },
+        "onPrimaryColor": {
+          "type": "string",
+          "description": "Text colour on primary background"
+        },
+        "textColor": {
+          "type": "string",
+          "description": "Default text colour"
+        },
+        "textMutedColor": {
+          "type": "string",
+          "description": "Muted/secondary text colour"
+        },
+        "errorColor": {
+          "type": "string",
+          "description": "Error/danger colour"
+        },
+        "successColor": {
+          "type": "string",
+          "description": "Success colour"
+        },
+        "warningColor": {
+          "type": "string",
+          "description": "Warning colour"
+        },
+        "borderRadius": {
+          "type": "number",
+          "description": "Border radius for cards/buttons (px)"
+        },
+        "fontFamily": {
+          "type": "string",
+          "description": "Font family (optional -- uses system default if not set)"
+        },
+        "appIcon": {
+          "type": "string",
+          "description": "App icon URL"
+        },
+        "splashImage": {
+          "type": "string",
+          "description": "Splash screen image URL"
+        },
+        "logo": {
+          "type": "string",
+          "description": "Logo URL (shown in side menu / login)"
+        },
+        "appName": {
+          "type": "string",
+          "description": "App name shown on login screen"
+        },
+        "tagline": {
+          "type": "string",
+          "description": "Tagline shown on login screen"
+        }
+      },
+      "required": [
+        "primaryColor",
+        "secondaryColor",
+        "backgroundColor",
+        "surfaceColor",
+        "onPrimaryColor",
+        "textColor",
+        "textMutedColor",
+        "errorColor",
+        "successColor",
+        "warningColor",
+        "borderRadius"
+      ],
+      "additionalProperties": false,
+      "description": "Theme configuration for the generated app. Controls colours, fonts, and basic visual styling."
+    },
+    "HaikoAuthConfig": {
+      "type": "object",
+      "properties": {
+        "authorityUrl": {
+          "type": "string",
+          "description": "Full authority URL for MSAL.\n- Entra External ID: \"https://{tenant}.ciamlogin.com/{tenantId}/v2.0\"\n- Legacy B2C: \"https://{tenant}.b2clogin.com/{tenant}.onmicrosoft.com/{policy}\""
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Application (client) ID registered in the external tenant"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "API scopes the app requests"
+        },
+        "apiBaseUrl": {
+          "type": "string",
+          "description": "The Haiko API base URL for this customer"
+        },
+        "redirectUri": {
+          "type": "string",
+          "description": "Redirect URI scheme (e.g., \"com.haiko.tenantapp://auth\"). Must match what's registered in the external tenant."
+        }
+      },
+      "required": [
+        "authorityUrl",
+        "clientId",
+        "scopes",
+        "apiBaseUrl",
+        "redirectUri"
+      ],
+      "additionalProperties": false,
+      "description": "Auth configuration for Microsoft Entra External ID. The generator uses this to configure MSAL in the generated app.\n\nWorks with both Entra External ID (new customers) and legacy Azure AD B2C (existing customers) -- the MSAL flow is identical, only the authority URL format differs."
+    },
+    "HaikoNavItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique reference (e.g., \"incident_active\")"
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label (e.g., \"My Repairs\")"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Phosphor icon name (kebab-case) or \"custom:<url>\" for an uploaded icon"
+        },
+        "iconColor": {
+          "type": "string",
+          "description": "Optional icon colour (hex or theme token). Rendered by HaikoIcon when set."
+        },
+        "image": {
+          "type": "string",
+          "description": "Optional image URL (overrides icon)"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order"
+        },
+        "target": {
+          "$ref": "#/definitions/HaikoNavTarget",
+          "description": "What this nav item links to"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "icon",
+        "order",
+        "target"
+      ],
+      "additionalProperties": false,
+      "description": "Navigation item -- maps to D365 hko_menulink entity. Defines what appears in the app's main navigation (side menu or tab bar)."
+    },
+    "HaikoNavTarget": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "list"
+            },
+            "screenId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "screenId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "form"
+            },
+            "screenId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "screenId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "rss-feed"
+            },
+            "screenId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "screenId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "webview"
+            },
+            "screenId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "screenId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "plugin"
+            },
+            "screenId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "screenId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "workflow"
+            },
+            "workflowId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "workflowId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "profile"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "content"
+            },
+            "category": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "dashboard"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "HaikoScreen": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/HaikoListScreen"
+        },
+        {
+          "$ref": "#/definitions/HaikoFormScreen"
+        },
+        {
+          "$ref": "#/definitions/HaikoRecordScreen"
+        },
+        {
+          "$ref": "#/definitions/HaikoRssFeedScreen"
+        },
+        {
+          "$ref": "#/definitions/HaikoWebViewScreen"
+        },
+        {
+          "$ref": "#/definitions/HaikoPluginScreen"
+        }
+      ],
+      "description": "Screen definitions. Each screen maps to a route in the generated app.\n\nD365-backed screens:\n- ListScreen -> hko_itemlist\n- FormScreen -> hko_page (with form fields)\n- RecordScreen -> hko_page (read-only detail view)\n\nExternal-content screens (no D365 binding — configured in Haiko Studio):\n- RssFeedScreen -> RSS / Atom feed list + detail\n- WebViewScreen -> embedded external URL\n\nPlugin screens (Feature #1544):\n- PluginScreen -> a whole page provided by a build-time plugin"
+    },
+    "HaikoListScreen": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "list"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique screen ID (e.g., \"incident_active\")"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name (e.g., \"My Repairs\")"
+        },
+        "entity": {
+          "type": "string",
+          "description": "CRM entity schema name (e.g., \"incident\")"
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "compact",
+            "detailed",
+            "card",
+            "article"
+          ],
+          "description": "Layout variant"
+        },
+        "customerField": {
+          "type": "string",
+          "description": "Which CRM field links records to the contact (e.g., \"customerid\")"
+        },
+        "titleField": {
+          "type": "string",
+          "description": "Field mappings -- which CRM fields map to list item parts"
+        },
+        "subtitleField": {
+          "type": "string"
+        },
+        "dateField": {
+          "type": "string"
+        },
+        "iconField": {
+          "type": "string"
+        },
+        "statusField": {
+          "type": "string"
+        },
+        "imageField": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string",
+          "description": "FetchXML filter to apply (optional)"
+        },
+        "segmentField": {
+          "type": "string",
+          "description": "Enable segment filtering (group by status, category, etc.)"
+        },
+        "featureField": {
+          "type": "string",
+          "description": "Feature field (icon, URL, or date used for visual treatment)"
+        },
+        "inactiveStatusValues": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Status values that mean \"inactive/resolved\""
+        },
+        "allowCreate": {
+          "type": "boolean",
+          "description": "Can the contact create new records from this list?"
+        },
+        "createScreenId": {
+          "type": "string",
+          "description": "If allowCreate, which form screen handles creation"
+        },
+        "detailScreenId": {
+          "type": "string",
+          "description": "Which screen to navigate to when tapping a record"
+        },
+        "defaultIcon": {
+          "type": "string",
+          "description": "Default icon for list items"
+        },
+        "defaultIconColor": {
+          "type": "string",
+          "description": "Default icon colour applied when no mapping matches (hex or theme token)"
+        },
+        "iconMappings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoIconMapping"
+          },
+          "description": "Optional per-value icon mappings keyed by iconField option-set values"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "entity",
+        "layout",
+        "customerField",
+        "titleField",
+        "allowCreate",
+        "detailScreenId"
+      ],
+      "additionalProperties": false,
+      "description": "List screen -- shows the contact's records for an entity. Maps to D365 hko_itemlist + hko_menulink."
+    },
+    "HaikoIconMapping": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "Option-set value this mapping applies to"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Phosphor icon name to render when value matches"
+        },
+        "color": {
+          "type": "string",
+          "description": "Optional icon colour (hex or theme token)"
+        }
+      },
+      "required": [
+        "value",
+        "icon"
+      ],
+      "additionalProperties": false,
+      "description": "Per-value icon mapping for a list screen.\n\nWhen the list screen's iconField (e.g., a Case Type option set) resolves to a given value, use the mapping's icon (and optional colour) for that row. Rows whose iconField value is absent from the mappings fall back to defaultIcon / defaultIconColor."
+    },
+    "HaikoFormScreen": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "form"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique screen ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name"
+        },
+        "entity": {
+          "type": "string",
+          "description": "CRM entity schema name"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoSection"
+          },
+          "description": "Form sections"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoFieldDefinition"
+          },
+          "description": "Form fields"
+        },
+        "createEndpointIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Endpoints for creating new records (submit buttons on create)"
+        },
+        "updateEndpointIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Endpoints for updating existing records (submit buttons on view/edit)"
+        },
+        "messagingEnabled": {
+          "type": "boolean",
+          "description": "Enable chat/messaging on this record"
+        },
+        "mediaEnabled": {
+          "type": "boolean",
+          "description": "Enable media/photo attachments"
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "form",
+            "article",
+            "profile"
+          ],
+          "description": "Layout type (affects how header area renders)"
+        },
+        "titleField": {
+          "type": "string",
+          "description": "Header field mappings (for article/profile layouts)"
+        },
+        "subtitleField": {
+          "type": "string"
+        },
+        "bodyField": {
+          "type": "string"
+        },
+        "dateField": {
+          "type": "string"
+        },
+        "featuredImageField": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "entity",
+        "sections",
+        "fields",
+        "createEndpointIds",
+        "updateEndpointIds",
+        "messagingEnabled",
+        "mediaEnabled",
+        "layout"
+      ],
+      "additionalProperties": false,
+      "description": "Form screen -- editable form for creating or updating a record. Maps to D365 hko_page + hko_haikofield + hko_pagesection."
+    },
+    "HaikoSection": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Section ID (for field assignment)"
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order"
+        },
+        "collapsible": {
+          "type": "boolean",
+          "description": "Whether the section is collapsible (default: true)"
+        },
+        "startCollapsed": {
+          "type": "boolean",
+          "description": "Whether the section starts collapsed (default: false)"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "order"
+      ],
+      "additionalProperties": false,
+      "description": "Section grouping for form/record screens"
+    },
+    "HaikoFieldDefinition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "CRM field schema name (e.g., \"title\", \"hko_casesubtype\")"
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label"
+        },
+        "type": {
+          "$ref": "#/definitions/HaikoFieldType",
+          "description": "Field type"
+        },
+        "section": {
+          "type": "string",
+          "description": "Which section this field belongs to"
+        },
+        "crmField": {
+          "type": "boolean",
+          "description": "Is this a real CRM field or synthetic?"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Validation"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "minLength": {
+          "type": "number"
+        },
+        "maxLength": {
+          "type": "number"
+        },
+        "minDate": {
+          "type": "string",
+          "description": "Earliest/latest selectable day for date and datetime fields. Either a fixed ISO date (\"2026-01-01\") or a day relative to when the field is shown: \"today\", \"today+30\", \"today-7\". Datetime fields can also take a moment in minutes: \"now\", \"now+60\", \"now-15\". A bound can also follow another date field on the form, plus or minus days: \"field:ec_startdate\", \"field:ec_startdate+7\" (no limit while that field is empty). Relative bounds are resolved on the device, so \"no past dates\" stays true over time. A day bound covers that whole day."
+        },
+        "maxDate": {
+          "type": "string"
+        },
+        "defaultValue": {
+          "type": "string",
+          "description": "Default value (can use ##key## syntax for customer metadata substitution)"
+        },
+        "showOnCreate": {
+          "type": "boolean",
+          "description": "Visibility rules"
+        },
+        "showOnView": {
+          "type": "boolean"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order within section"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoFieldOption"
+          },
+          "description": "Options for optionset/lookup fields"
+        },
+        "lookupConfig": {
+          "$ref": "#/definitions/HaikoLookupConfig",
+          "description": "Lookup configuration (which entity to search)"
+        },
+        "fileConfig": {
+          "$ref": "#/definitions/HaikoFileConfig",
+          "description": "File/camera field configuration"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoFieldRuleGroup"
+          },
+          "description": "Conditional visibility/disable rules"
+        },
+        "endpointId": {
+          "type": "string",
+          "description": "Optional endpoint to call when this field changes (button fields)"
+        },
+        "plugin": {
+          "$ref": "#/definitions/HaikoPluginRef",
+          "description": "For type \"plugin\": the plugin field slot that renders this input"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "type",
+        "crmField",
+        "required",
+        "showOnCreate",
+        "showOnView",
+        "order"
+      ],
+      "additionalProperties": false,
+      "description": "A single field on a form/screen"
+    },
+    "HaikoFieldType": {
+      "type": "string",
+      "enum": [
+        "text",
+        "textarea",
+        "number",
+        "decimal",
+        "date",
+        "datetime",
+        "optionset",
+        "lookup",
+        "boolean",
+        "currency",
+        "email",
+        "phone",
+        "url",
+        "camera",
+        "file",
+        "signature",
+        "location",
+        "plugin"
+      ],
+      "description": "All supported field types"
+    },
+    "HaikoFieldOption": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number"
+        },
+        "detail": {
+          "type": "string",
+          "description": "Optional second line in the picker -- used by endpoint-supplied options"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "Option for optionset/dropdown fields"
+    },
+    "HaikoLookupConfig": {
+      "type": "object",
+      "properties": {
+        "listScreenId": {
+          "type": "string",
+          "description": "id of the list screen supplying the candidate records"
+        },
+        "endpointId": {
+          "type": "string",
+          "description": "id of an endpoint supplying the candidates instead of a list. Set exactly one of this and listScreenId.\n\nFor options that are not rows in a table -- an advisor's free slots, which are computed. The endpoint must be a d365_action (a Custom API or Action) with a string response property named \"Options\" holding a JSON array of HaikoFieldOption. The app fetches it each time the picker opens and never caches it, because what it returns goes stale in minutes.\n\nSee the wiki: Architecture / Fields backed by an API."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for lookup (entity reference) fields.\n\nA lookup references an existing LIST, not an entity. The list already declares the entity, the filter and the display mappings, and its scoping is enforced server-side by the security manifest -- so a contact cannot widen what they are offered.\n\nThis replaced an { entity, displayField, searchField } shape that had no way to express which records a contact may see: a config author doing the obvious thing would have exposed an unscoped entity search to every tenant.\n\nBoth lookup scenarios are the same feature, differing only in how the referenced list is configured:\n\n  list WITH a customerField      -> the contact's own related records   list WITHOUT one, plus filter  -> a curated set\n\nSee the wiki: Architecture / Lookup Fields."
+    },
+    "HaikoFileConfig": {
+      "type": "object",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoFileSource"
+          },
+          "description": "Which input sources are available. Omitted means all three.\n\nOptional because the default is real, not aspirational: HaikoFileField resolves `fileConfig?.sources ?? [...]` at render. Declaring it required contradicted both that behaviour and this comment, and made every generated screen with a file field fail to typecheck, because the Portal does not write the property (#1794)."
+        },
+        "allowedTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Allowed MIME types or extensions (e.g. [\".pdf\", \".docx\", \"image/*\"])"
+        },
+        "maxFileSize": {
+          "type": "number",
+          "description": "Maximum file size in bytes (e.g. 10485760 for 10 MB)"
+        },
+        "maxFiles": {
+          "type": "number",
+          "description": "Maximum number of files (1 = single-file, >1 = multi-file)"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for file and camera fields"
+    },
+    "HaikoFileSource": {
+      "type": "string",
+      "enum": [
+        "camera",
+        "gallery",
+        "document"
+      ],
+      "description": "Allowed source for file/camera fields"
+    },
+    "HaikoFieldRuleGroup": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "hide",
+            "disable"
+          ],
+          "description": "What happens when rules match"
+        },
+        "condition": {
+          "type": "string",
+          "enum": [
+            "and",
+            "or"
+          ],
+          "description": "How to join multiple rules"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoFieldRule"
+          },
+          "description": "Individual rules"
+        }
+      },
+      "required": [
+        "action",
+        "condition",
+        "rules"
+      ],
+      "additionalProperties": false,
+      "description": "A group of rules that control field visibility or editability. Maps to D365 hko_fielddependency records."
+    },
+    "HaikoFieldRule": {
+      "type": "object",
+      "properties": {
+        "dependsOn": {
+          "type": "string",
+          "description": "The other field this rule depends on"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "eq",
+            "neq",
+            "hasValue",
+            "isEmpty",
+            "isTrue",
+            "isFalse"
+          ],
+          "description": "Comparison operator"
+        },
+        "value": {
+          "type": "string",
+          "description": "Value to compare against (for eq/neq)"
+        },
+        "override": {
+          "type": "boolean",
+          "description": "If true, always apply regardless of condition join"
+        }
+      },
+      "required": [
+        "dependsOn",
+        "operator"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoPluginRef": {
+      "type": "object",
+      "properties": {
+        "pluginId": {
+          "type": "string"
+        },
+        "export": {
+          "type": "string",
+          "description": "Which slot export to render; its kind must match where it is placed"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          },
+          "description": "Values for the slot's config fields"
+        }
+      },
+      "required": [
+        "pluginId",
+        "export"
+      ],
+      "additionalProperties": false,
+      "description": "A plugin placed somewhere in an app. Its version comes from the app's lock list."
+    },
+    "HaikoRecordScreen": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "record"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique screen ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name"
+        },
+        "entity": {
+          "type": "string",
+          "description": "CRM entity schema name"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoSection"
+          },
+          "description": "Sections"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoFieldDefinition"
+          },
+          "description": "Fields to display"
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "detail",
+            "article",
+            "profile"
+          ],
+          "description": "Layout type"
+        },
+        "titleField": {
+          "type": "string",
+          "description": "Header field mappings"
+        },
+        "subtitleField": {
+          "type": "string"
+        },
+        "bodyField": {
+          "type": "string"
+        },
+        "dateField": {
+          "type": "string"
+        },
+        "featuredImageField": {
+          "type": "string"
+        },
+        "statusTracker": {
+          "$ref": "#/definitions/HaikoStatusTrackerConfig",
+          "description": "Status tracking configuration"
+        },
+        "timelineEnabled": {
+          "type": "boolean",
+          "description": "Enable timeline (activity history) on this record"
+        },
+        "messagingEnabled": {
+          "type": "boolean",
+          "description": "Enable chat/messaging"
+        },
+        "mediaEnabled": {
+          "type": "boolean",
+          "description": "Enable media/photo attachments"
+        },
+        "actionEndpointIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Endpoints available on this record (action buttons)"
+        },
+        "journey": {
+          "$ref": "#/definitions/HaikoJourney",
+          "description": "Contact Journey configuration (optional)"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "entity",
+        "sections",
+        "fields",
+        "layout",
+        "timelineEnabled",
+        "messagingEnabled",
+        "mediaEnabled",
+        "actionEndpointIds"
+      ],
+      "additionalProperties": false,
+      "description": "Record screen -- read-only view of a record with status tracking, timeline, messaging. The contact can view but fields are not editable (unless specific fields are marked editable).\n\nUses the same field/section model as FormScreen but renders differently."
+    },
+    "HaikoStatusTrackerConfig": {
+      "type": "object",
+      "properties": {
+        "statusField": {
+          "type": "string",
+          "description": "Which CRM field holds the status (e.g., \"statuscode\")"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoStatusStage"
+          },
+          "description": "Ordered list of stages"
+        }
+      },
+      "required": [
+        "statusField",
+        "stages"
+      ],
+      "additionalProperties": false,
+      "description": "Configures the visual progress tracker on a record screen. Maps status field values to named stages."
+    },
+    "HaikoStatusStage": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Display label (e.g., \"Submitted\", \"Under Review\", \"Completed\")"
+        },
+        "statusValues": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "CRM status values that map to this stage"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional description shown when this is the active stage"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Icon for this stage"
+        },
+        "iconColor": {
+          "type": "string",
+          "description": "Optional icon colour (hex or theme token)"
+        }
+      },
+      "required": [
+        "label",
+        "statusValues"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoJourney": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique journey ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name (e.g., \"Housing Application Journey\")"
+        },
+        "entity": {
+          "type": "string",
+          "description": "CRM entity this journey applies to (e.g., \"incident\")"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoJourneyStage"
+          },
+          "description": "Stages. Order within the array is not significant -- see stage.order."
+        },
+        "defaultMessage": {
+          "type": "string",
+          "description": "Message shown when no stage's `activeWhen` matches.\n\nRequired: the journey is the only vocabulary the contact sees. The app never falls back to a raw CRM status value, so without this an unmatched record would render nothing at all. Write it to be calm and generic -- the configuration gap is surfaced to the developer in Haiko Studio, not to the contact."
+        },
+        "defaultContactAction": {
+          "$ref": "#/definitions/HaikoContactAction",
+          "description": "Where an unmatched record sits for list segmentation.\n\nRequired for the same reason: lists bucket by `contactAction`, so a record matching no stage still needs a declared home. Never inferred."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "entity",
+        "stages",
+        "defaultMessage",
+        "defaultContactAction"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoJourneyStage": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique stage ID"
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label shown in the progress indicator"
+        },
+        "order": {
+          "type": "number",
+          "description": "Display order (lower renders first).\n\nAlso acts as precedence for `activeWhen`: if two stages are both active, the lower order wins (first match wins). That coupling is deliberate -- one ordering is simpler to author than two -- and Haiko Studio warns on overlapping predicates so the resolution is never silent."
+        },
+        "activeWhen": {
+          "type": "string",
+          "description": "Is the record here right now?\n\nHaiko expression, evaluated against CRM record field values:   oak_status == 140000003   statuscode == 2 AND isEmpty(hko_documentsreceived)"
+        },
+        "completeWhen": {
+          "type": "string",
+          "description": "Is this stage behind us? Evaluated independently of `activeWhen` and of position, so skipped stages, branches and returns all resolve correctly.\n\nDeclare what in the data PROVES this stage happened:   hasValue(oak_scheduleddate)\n\nRequired -- see the default rule in the file header. A stage with no evidence is never shown as complete."
+        },
+        "appliesWhen": {
+          "type": "string",
+          "description": "Is this stage relevant to this record at all? Stages whose predicate is false are pruned entirely rather than greyed out.\n\n  oak_category != 140000007\n\nOmitted means the stage always applies."
+        },
+        "pathRole": {
+          "$ref": "#/definitions/HaikoJourneyPathRole",
+          "description": "How this stage sits on the visible path. Omitted means \"step\"."
+        },
+        "message": {
+          "type": "string",
+          "description": "Message shown to the contact at this stage. Supports {fieldName} templates."
+        },
+        "description": {
+          "type": "string",
+          "description": "Longer description (optional)"
+        },
+        "contactAction": {
+          "$ref": "#/definitions/HaikoContactAction",
+          "description": "What the contact's role is at this stage:\n- \"none\": informational only\n- \"waiting\": business is working on it\n- \"action_required\": contact needs to do something\n\nAlso drives list segmentation -- lists bucket records by this value rather than by raw status, so the list and the record screen always use the same vocabulary."
+        },
+        "action": {
+          "$ref": "#/definitions/HaikoJourneyAction",
+          "description": "Action available to the contact (if any)"
+        },
+        "showFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "CRM fields this stage owns. They render inside the stage's block, and remain visible in the collapsed history once the stage is complete."
+        },
+        "dateField": {
+          "type": "string",
+          "description": "CRM date field evidencing WHEN this stage happened, used for the history entry and for \"waiting since\" display on the active stage.\n\nThis is a business field the organisation already maintains for its own reasons (e.g. `oak_scheduleddate`) -- Haiko never writes it."
+        },
+        "editableAfter": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Fields from `showFields` that stay editable once this stage is behind us. Everything else in a completed stage is read-only. Evaluated per render; nothing is stored."
+        },
+        "readOnlyFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Fields from `showFields` the contact sees but never changes, even while this stage is active -- e.g. a learning agreement the organisation provides for them to read."
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "order",
+        "activeWhen",
+        "completeWhen",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoJourneyPathRole": {
+      "type": "string",
+      "enum": [
+        "step",
+        "exception",
+        "terminal"
+      ],
+      "description": "How a stage sits on the journey's visible path.\n\n- \"step\":      a normal stage on the happy path; occupies a position in the                progress indicator\n- \"exception\": a real stage the record can occupy, but off the happy path                (e.g. \"More Info Needed\"). Rendered aside from the track so                returning to it does not move the indicator backwards.\n- \"terminal\":  an end state that is not a completion of the path                (e.g. \"Cancelled\"). Never renders a trail of completed steps                behind it, because it did not progress through them.\n\nOmitted means \"step\" -- the common case, and it under-claims nothing."
+    },
+    "HaikoContactAction": {
+      "type": "string",
+      "enum": [
+        "none",
+        "waiting",
+        "action_required"
+      ],
+      "description": "Whose move it is at a given stage. Drives the badge on the record screen and the bucket a record falls into on list screens, so both surfaces speak with one vocabulary."
+    },
+    "HaikoJourneyAction": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "form",
+            "workflow",
+            "confirm",
+            "navigate",
+            "endpoint"
+          ],
+          "description": "Action type"
+        },
+        "label": {
+          "type": "string",
+          "description": "Button label (e.g., \"Upload Documents\")"
+        },
+        "formScreenId": {
+          "type": "string",
+          "description": "For \"form\": which form screen to open"
+        },
+        "workflowId": {
+          "type": "string",
+          "description": "For \"workflow\": which workflow to start"
+        },
+        "endpointId": {
+          "type": "string",
+          "description": "For \"endpoint\": direct action call"
+        },
+        "screenId": {
+          "type": "string",
+          "description": "For \"navigate\": go to another screen"
+        },
+        "confirmMessage": {
+          "type": "string",
+          "description": "For \"confirm\": confirmation text"
+        }
+      },
+      "required": [
+        "type",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoRssFeedScreen": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "rss-feed"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique screen ID (e.g., \"news_feed\")"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name (e.g., \"News\")"
+        },
+        "feedUrl": {
+          "type": "string",
+          "description": "The RSS / Atom feed URL (must be HTTPS for iOS ATS compliance)"
+        },
+        "feedTitleOverride": {
+          "type": "string",
+          "description": "Optional override for the feed's internal title. When unset, the app shows the title the feed itself publishes."
+        },
+        "enableSearch": {
+          "type": "boolean",
+          "description": "Enable a search box over the fetched items (default: false)"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "feedUrl"
+      ],
+      "additionalProperties": false,
+      "description": "RSS / Atom feed screen. Renders a list of items pulled from a feed URL and a detail view for each item. Content is fetched client-side at runtime; no D365 binding, no authentication.\n\nConfigured in Haiko Studio (portal), stored in the app's Cosmos config blob."
+    },
+    "HaikoWebViewScreen": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "webview"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique screen ID (e.g., \"help_centre\")"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name (e.g., \"Help Centre\")"
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL to embed (must be HTTPS for iOS ATS compliance)"
+        },
+        "allowExternalNav": {
+          "type": "boolean",
+          "description": "If true, links that navigate to a different host stay inside the WebView. If false (default), such links open in the OS browser via Linking.openURL."
+        },
+        "hideSelectors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "CSS selectors to hide after page load (used for stripping site headers, footers, nav bars, etc). Injected as `display: none !important` rules."
+        },
+        "injectedCss": {
+          "type": "string",
+          "description": "Arbitrary CSS injected after page load. Applied after hideSelectors."
+        },
+        "injectedJs": {
+          "type": "string",
+          "description": "Arbitrary JS injected once after page load. Runs in the page's context; be careful."
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "url"
+      ],
+      "additionalProperties": false,
+      "description": "WebView screen. Embeds an arbitrary external URL in a native WebView wrapper, with optional CSS/JS injection for stripping site chrome.\n\nConfigured in Haiko Studio (portal), stored in the app's Cosmos config blob."
+    },
+    "HaikoPluginScreen": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "plugin"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique screen ID (e.g., \"offices_map\")"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name (e.g., \"Offices near me\")"
+        },
+        "plugin": {
+          "$ref": "#/definitions/HaikoPluginRef",
+          "description": "Which plugin and slot export renders this page"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "name",
+        "plugin"
+      ],
+      "additionalProperties": false,
+      "description": "A whole page provided by a plugin (a \"screen\" slot). Configured in Haiko Studio; the plugin's version comes from HaikoAppDefinition.plugins."
+    },
+    "HaikoWorkflow": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique workflow ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name (e.g., \"Report a Repair\", \"Submit a Claim\")"
+        },
+        "entity": {
+          "type": "string",
+          "description": "CRM entity this workflow creates/updates"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoWorkflowStep"
+          },
+          "description": "Ordered steps"
+        },
+        "navigation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoStepNavigation"
+          },
+          "description": "Navigation rules (conditional transitions between steps)"
+        },
+        "submitEndpointId": {
+          "type": "string",
+          "description": "Endpoint to call on final submission"
+        },
+        "completionMessage": {
+          "type": "string",
+          "description": "Message shown after successful submission"
+        },
+        "completionNavigateTo": {
+          "type": "string",
+          "description": "Where to navigate after completion"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "entity",
+        "steps",
+        "navigation",
+        "submitEndpointId"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoWorkflowStep": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Step ID"
+        },
+        "label": {
+          "type": "string",
+          "description": "Step display name (shown in progress indicator)"
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order"
+        },
+        "type": {
+          "$ref": "#/definitions/HaikoStepType",
+          "description": "Step type"
+        },
+        "formScreenId": {
+          "type": "string",
+          "description": "For 'form' steps: which form screen provides the fields"
+        },
+        "content": {
+          "type": "string",
+          "description": "For 'info' steps: rich text content to display"
+        },
+        "plugin": {
+          "$ref": "#/definitions/HaikoPluginRef",
+          "description": "For 'plugin' steps: the plugin step slot that renders this step"
+        },
+        "completionRule": {
+          "type": "string",
+          "description": "Condition for this step to be considered complete. If not set, step is complete when the user taps Next. Can reference field values (e.g., \"fields.category != null\")"
+        },
+        "skipCondition": {
+          "type": "string",
+          "description": "Condition for auto-skipping this step. Evaluated before showing the step. If true, skip to next. (e.g., \"fields.claimType != 'vehicle'\" skips vehicle details step)"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "order",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoStepType": {
+      "type": "string",
+      "enum": [
+        "form",
+        "confirmation",
+        "summary",
+        "info",
+        "plugin"
+      ]
+    },
+    "HaikoStepNavigation": {
+      "type": "object",
+      "properties": {
+        "fromStepId": {
+          "type": "string",
+          "description": "Step this rule applies to (leaving this step)"
+        },
+        "toStepId": {
+          "type": "string",
+          "description": "Step to navigate to"
+        },
+        "navigationType": {
+          "$ref": "#/definitions/HaikoNavigationType",
+          "description": "Type of navigation"
+        },
+        "condition": {
+          "type": "string",
+          "description": "Condition for this navigation to apply. If not set, this is the default navigation from this step. Can reference field values (e.g., \"fields.category == 'urgent'\")"
+        }
+      },
+      "required": [
+        "fromStepId",
+        "toStepId",
+        "navigationType"
+      ],
+      "additionalProperties": false,
+      "description": "Conditional navigation between workflow steps. If no navigation rules match, default is sequential (step N -> step N+1)."
+    },
+    "HaikoNavigationType": {
+      "type": "string",
+      "enum": [
+        "next",
+        "skip",
+        "branch",
+        "back"
+      ]
+    },
+    "HaikoEndpoint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Endpoint ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name (shown on submit button, e.g., \"Submit\", \"Save\")"
+        },
+        "type": {
+          "$ref": "#/definitions/HaikoEndpointType",
+          "description": "Endpoint type"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Target URI:\n- d365_direct: entity schema name (e.g., \"incident\")\n- d365_action: action name\n- logic_app: Logic App HTTP trigger URL"
+        },
+        "submitMessage": {
+          "type": "string",
+          "description": "Message shown to user after successful submission"
+        },
+        "uniqueReference": {
+          "type": "string",
+          "description": "Unique reference for this endpoint"
+        },
+        "global": {
+          "type": "boolean",
+          "description": "Is this a global action (available across screens) or page-specific"
+        },
+        "fieldMappings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Field mappings -- maps app field names to endpoint parameter names. Only used for d365_action and logic_app types.\n\nKey: app field name (CrmSchemaName) Value: endpoint parameter name"
+        },
+        "customerField": {
+          "type": "string",
+          "description": "Optional: field name for customer ID parameter (for actions)"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "uri",
+        "global"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoEndpointType": {
+      "type": "string",
+      "enum": [
+        "d365_direct",
+        "d365_action",
+        "logic_app"
+      ],
+      "description": "Endpoint definitions -- where form submissions and actions go. Maps to D365 hko_haikoinboundendpoint + hko_endpointmapping.\n\nThree types, matching the existing architecture:\n- d365_direct: Create/update a D365 entity directly\n- d365_action: Call a D365 custom action\n- logic_app: POST to an Azure Logic App"
+    },
+    "HaikoPluginLock": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "additionalProperties": false,
+      "description": "One plugin compiled into an app, at one version"
+    }
+  }
+}

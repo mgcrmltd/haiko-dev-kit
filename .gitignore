@@ -1,0 +1,12 @@
+# Secrets
+.env
+
+# What the skills learn about your CRM and app stays on your machine
+workspace/*
+!workspace/README.md
+
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.DS_Store

@@ -1,0 +1,31 @@
+appId: host.exp.Exponent
+# Preview app smoke test: each slot renders against mock data. Start the preview
+# with npm start (or expo start --go --port 8082) first.
+---
+- openLink: "exp://127.0.0.1:8082"
+- extendedWaitUntil:
+    visible: "Screen"
+    timeout: 120000
+- tapOn: "Screen"
+- extendedWaitUntil:
+    visible: "My open cases"
+    timeout: 120000
+- extendedWaitUntil:
+    visible: "Leaking tap"
+    timeout: 15000
+- assertNotVisible: "Fixed: fence panel"
+- takeScreenshot: shot-17-starter-screen
+- tapOn: "Widget"
+- extendedWaitUntil:
+    visible: "Open cases"
+    timeout: 10000
+- tapOn: "Field"
+- assertVisible: "Reference.*"
+- assertVisible: "Form value: null"
+- tapOn: "Step"
+- tapOn: "Next"
+- assertVisible: "Please confirm before continuing."
+- tapOn: ".*I confirm the details are correct"
+- tapOn: "Next"
+- assertVisible: "Next allowed"
+- takeScreenshot: shot-18-starter-step

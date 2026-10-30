@@ -1,0 +1,1373 @@
+{
+  "id": "empirical-college",
+  "name": "Empirical College",
+  "theme": {
+    "primaryColor": "#1E3A5F",
+    "secondaryColor": "#0F766E",
+    "backgroundColor": "#F8FAFC",
+    "surfaceColor": "#FFFFFF",
+    "onPrimaryColor": "#FFFFFF",
+    "textColor": "#0F172A",
+    "textMutedColor": "#475569",
+    "errorColor": "#B91C1C",
+    "successColor": "#15803D",
+    "warningColor": "#B45309",
+    "borderRadius": 10
+  },
+  "auth": {
+    "authorityUrl": "https://<your-tenant>.ciamlogin.com/<tenant-id>/v2.0",
+    "clientId": "<app registration client id>",
+    "scopes": [
+      "openid",
+      "profile",
+      "offline_access"
+    ],
+    "apiBaseUrl": "https://<your-haiko-api>.azurewebsites.net",
+    "redirectUri": "com.example.studentapp://auth"
+  },
+  "navigation": [
+    {
+      "id": "nav_home",
+      "label": "Home",
+      "icon": "house",
+      "order": 0,
+      "target": {
+        "type": "dashboard"
+      }
+    },
+    {
+      "id": "nav_support",
+      "label": "Ask for support",
+      "icon": "hand-heart",
+      "order": 1,
+      "target": {
+        "type": "form",
+        "screenId": "ask_for_support"
+      }
+    },
+    {
+      "id": "nav_wellbeing",
+      "label": "My wellbeing requests",
+      "icon": "heart",
+      "order": 2,
+      "target": {
+        "type": "list",
+        "screenId": "my_wellbeing_list"
+      }
+    },
+    {
+      "id": "nav_propose",
+      "label": "Propose a placement",
+      "icon": "briefcase",
+      "order": 3,
+      "target": {
+        "type": "workflow",
+        "workflowId": "propose_placement"
+      }
+    },
+    {
+      "id": "nav_placements",
+      "label": "My placements",
+      "icon": "buildings",
+      "order": 4,
+      "target": {
+        "type": "list",
+        "screenId": "my_placements_list"
+      }
+    },
+    {
+      "id": "nav_checkins",
+      "label": "My check-ins",
+      "icon": "list-checks",
+      "order": 5,
+      "target": {
+        "type": "list",
+        "screenId": "my_checkins_list"
+      }
+    }
+  ],
+  "screens": [
+    {
+      "type": "form",
+      "id": "ask_for_support",
+      "name": "Ask for support",
+      "entity": "incident",
+      "layout": "form",
+      "messagingEnabled": false,
+      "mediaEnabled": false,
+      "sections": [
+        {
+          "id": "main",
+          "label": "Tell us what's going on",
+          "order": 1
+        }
+      ],
+      "fields": [
+        {
+          "name": "ec_category",
+          "label": "What is it about?",
+          "type": "optionset",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 1,
+          "options": [
+            {
+              "value": "1",
+              "label": "Anxiety or low mood",
+              "order": 1
+            },
+            {
+              "value": "2",
+              "label": "Academic stress",
+              "order": 2
+            },
+            {
+              "value": "3",
+              "label": "Financial worries",
+              "order": 3
+            },
+            {
+              "value": "4",
+              "label": "Housing",
+              "order": 4
+            },
+            {
+              "value": "5",
+              "label": "Harassment or bullying",
+              "order": 5
+            },
+            {
+              "value": "6",
+              "label": "Disability support",
+              "order": 6
+            },
+            {
+              "value": "7",
+              "label": "Alcohol or substance use",
+              "order": 7
+            },
+            {
+              "value": "8",
+              "label": "Something else",
+              "order": 8
+            }
+          ]
+        },
+        {
+          "name": "description",
+          "label": "What's going on?",
+          "type": "textarea",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 2,
+          "maxLength": 2000
+        },
+        {
+          "name": "ec_urgency",
+          "label": "How urgent is it?",
+          "type": "optionset",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 3,
+          "options": [
+            {
+              "value": "1",
+              "label": "I need help today",
+              "order": 1
+            },
+            {
+              "value": "2",
+              "label": "Within a few days",
+              "order": 2
+            },
+            {
+              "value": "3",
+              "label": "No rush",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "name": "ec_hasrelated",
+          "label": "Is this about an earlier request?",
+          "type": "boolean",
+          "section": "main",
+          "crmField": false,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 4
+        },
+        {
+          "name": "ec_relatedrequestid",
+          "label": "Which request?",
+          "type": "lookup",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 5,
+          "lookupConfig": {
+            "listScreenId": "my_wellbeing_list"
+          },
+          "rules": [
+            {
+              "action": "hide",
+              "condition": "and",
+              "rules": [
+                {
+                  "dependsOn": "ec_hasrelated",
+                  "operator": "isFalse"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ec_consentgiven",
+          "label": "I agree to the wellbeing team using this to support me",
+          "type": "boolean",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 6
+        }
+      ],
+      "createEndpointIds": [
+        "submit_wellbeing"
+      ],
+      "updateEndpointIds": [
+        "book_appointment"
+      ]
+    },
+    {
+      "type": "list",
+      "id": "my_wellbeing_list",
+      "name": "My wellbeing requests",
+      "entity": "incident",
+      "layout": "detailed",
+      "customerField": "customerid",
+      "titleField": "title",
+      "subtitleField": "description",
+      "dateField": "createdon",
+      "allowCreate": true,
+      "createScreenId": "ask_for_support",
+      "detailScreenId": "wellbeing_detail",
+      "filter": "<filter><condition attribute='ec_category' operator='not-null' /></filter>",
+      "iconField": "ec_category",
+      "defaultIcon": "heart",
+      "defaultIconColor": "#DB2777",
+      "iconMappings": [
+        {
+          "value": 1,
+          "icon": "cloud-rain",
+          "color": "#4F46E5"
+        },
+        {
+          "value": 2,
+          "icon": "books",
+          "color": "#B45309"
+        },
+        {
+          "value": 3,
+          "icon": "coins",
+          "color": "#047857"
+        },
+        {
+          "value": 4,
+          "icon": "house-line",
+          "color": "#2563EB"
+        },
+        {
+          "value": 5,
+          "icon": "shield-warning",
+          "color": "#DC2626"
+        },
+        {
+          "value": 6,
+          "icon": "wheelchair",
+          "color": "#7C3AED"
+        },
+        {
+          "value": 7,
+          "icon": "wine",
+          "color": "#0E7490"
+        },
+        {
+          "value": 8,
+          "icon": "chat-circle-dots",
+          "color": "#4B5563"
+        }
+      ]
+    },
+    {
+      "type": "record",
+      "id": "wellbeing_detail",
+      "name": "Wellbeing request",
+      "entity": "incident",
+      "layout": "detail",
+      "titleField": "title",
+      "dateField": "createdon",
+      "timelineEnabled": false,
+      "messagingEnabled": false,
+      "mediaEnabled": false,
+      "actionEndpointIds": [],
+      "sections": [
+        {
+          "id": "main",
+          "label": "Your request",
+          "order": 1
+        }
+      ],
+      "fields": [
+        {
+          "name": "ec_category",
+          "label": "What it's about",
+          "type": "optionset",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 1,
+          "options": [
+            {
+              "value": "1",
+              "label": "Anxiety or low mood",
+              "order": 1
+            },
+            {
+              "value": "2",
+              "label": "Academic stress",
+              "order": 2
+            },
+            {
+              "value": "3",
+              "label": "Financial worries",
+              "order": 3
+            },
+            {
+              "value": "4",
+              "label": "Housing",
+              "order": 4
+            },
+            {
+              "value": "5",
+              "label": "Harassment or bullying",
+              "order": 5
+            },
+            {
+              "value": "6",
+              "label": "Disability support",
+              "order": 6
+            },
+            {
+              "value": "7",
+              "label": "Alcohol or substance use",
+              "order": 7
+            },
+            {
+              "value": "8",
+              "label": "Something else",
+              "order": 8
+            }
+          ]
+        },
+        {
+          "name": "description",
+          "label": "What's going on",
+          "type": "textarea",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 2
+        },
+        {
+          "name": "ec_urgency",
+          "label": "How urgent",
+          "type": "optionset",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 3,
+          "options": [
+            {
+              "value": "1",
+              "label": "I need help today",
+              "order": 1
+            },
+            {
+              "value": "2",
+              "label": "Within a few days",
+              "order": 2
+            },
+            {
+              "value": "3",
+              "label": "No rush",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "name": "ec_appointmentslot",
+          "label": "Choose a time",
+          "type": "lookup",
+          "section": "main",
+          "crmField": false,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 4,
+          "lookupConfig": {
+            "endpointId": "advisor_slots"
+          }
+        },
+        {
+          "name": "ec_appointmenton",
+          "label": "When",
+          "type": "datetime",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 5
+        },
+        {
+          "name": "ec_appointmentmode",
+          "label": "How",
+          "type": "optionset",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 6,
+          "options": [
+            {
+              "value": "1",
+              "label": "In person",
+              "order": 1
+            },
+            {
+              "value": "2",
+              "label": "Video call",
+              "order": 2
+            },
+            {
+              "value": "3",
+              "label": "Phone",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "name": "ec_appointmentlocation",
+          "label": "Where",
+          "type": "text",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 7
+        }
+      ],
+      "journey": {
+        "id": "wellbeing",
+        "name": "Wellbeing request",
+        "entity": "incident",
+        "defaultMessage": "We're looking at your request.",
+        "defaultContactAction": "waiting",
+        "stages": [
+          {
+            "id": "withdrawn",
+            "label": "Withdrawn",
+            "order": 0,
+            "pathRole": "terminal",
+            "activeWhen": "statuscode == 450000007",
+            "completeWhen": "isEmpty(createdon)",
+            "message": "You withdrew this request. You can ask for support again at any time.",
+            "contactAction": "none"
+          },
+          {
+            "id": "received",
+            "label": "Request received",
+            "order": 1,
+            "activeWhen": "isEmpty(ec_advisorid)",
+            "completeWhen": "hasValue(createdon)",
+            "message": "We've got it. Someone will look at this shortly.",
+            "contactAction": "waiting",
+            "dateField": "createdon",
+            "showFields": [
+              "ec_category",
+              "description",
+              "ec_urgency"
+            ],
+            "readOnlyFields": [
+              "ec_category",
+              "description",
+              "ec_urgency"
+            ]
+          },
+          {
+            "id": "assigned",
+            "label": "Advisor assigned",
+            "order": 2,
+            "activeWhen": "hasValue(ec_advisorid) AND isEmpty(ec_appointmenton) AND statuscode != 450000003",
+            "completeWhen": "hasValue(ec_advisorid)",
+            "message": "{ec_advisorid.name} will be in touch to arrange a time.",
+            "contactAction": "waiting"
+          },
+          {
+            "id": "choose",
+            "label": "Choose an appointment",
+            "order": 3,
+            "activeWhen": "hasValue(ec_advisorid) AND isEmpty(ec_appointmenton) AND statuscode == 450000003",
+            "completeWhen": "hasValue(ec_appointmenton)",
+            "message": "Pick a time that suits you with {ec_advisorid.name}, then save.",
+            "contactAction": "action_required",
+            "showFields": [
+              "ec_appointmentslot",
+              "ec_appointmenton"
+            ],
+            "readOnlyFields": [
+              "ec_appointmenton"
+            ]
+          },
+          {
+            "id": "booked",
+            "label": "Appointment booked",
+            "order": 4,
+            "activeWhen": "hasValue(ec_appointmenton) AND isEmpty(ec_supportstartedon)",
+            "completeWhen": "hasValue(ec_appointmenton)",
+            "message": "Your appointment is confirmed.",
+            "contactAction": "none",
+            "showFields": [
+              "ec_appointmenton",
+              "ec_appointmentmode",
+              "ec_appointmentlocation"
+            ],
+            "readOnlyFields": [
+              "ec_appointmenton",
+              "ec_appointmentmode",
+              "ec_appointmentlocation"
+            ]
+          },
+          {
+            "id": "support",
+            "label": "Support in place",
+            "order": 5,
+            "activeWhen": "hasValue(ec_supportstartedon) AND isEmpty(ec_closedon)",
+            "completeWhen": "hasValue(ec_supportstartedon)",
+            "message": "We're working with you. Your advisor will be in touch.",
+            "contactAction": "none",
+            "dateField": "ec_supportstartedon"
+          },
+          {
+            "id": "closed",
+            "label": "Closed",
+            "order": 6,
+            "activeWhen": "hasValue(ec_closedon)",
+            "completeWhen": "hasValue(ec_closedon)",
+            "message": "This request is closed. You can ask for support again at any time.",
+            "contactAction": "none",
+            "dateField": "ec_closedon"
+          }
+        ]
+      }
+    },
+    {
+      "type": "form",
+      "id": "placement_employer",
+      "name": "The employer",
+      "entity": "ec_placement",
+      "layout": "form",
+      "messagingEnabled": false,
+      "mediaEnabled": false,
+      "sections": [
+        {
+          "id": "main",
+          "label": "The employer",
+          "order": 1
+        }
+      ],
+      "fields": [
+        {
+          "name": "ec_employername",
+          "label": "Employer name",
+          "type": "text",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 1,
+          "maxLength": 200
+        },
+        {
+          "name": "ec_employeraddress",
+          "label": "Employer address",
+          "type": "textarea",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 2
+        },
+        {
+          "name": "ec_roletitle",
+          "label": "Role title",
+          "type": "text",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 3,
+          "maxLength": 200
+        }
+      ],
+      "createEndpointIds": [
+        "submit_placement"
+      ],
+      "updateEndpointIds": [
+        "update_placement"
+      ]
+    },
+    {
+      "type": "form",
+      "id": "placement_dates",
+      "name": "Dates and supervisor",
+      "entity": "ec_placement",
+      "layout": "form",
+      "messagingEnabled": false,
+      "mediaEnabled": false,
+      "sections": [
+        {
+          "id": "main",
+          "label": "Dates and supervisor",
+          "order": 1
+        }
+      ],
+      "fields": [
+        {
+          "name": "ec_startdate",
+          "label": "Start date",
+          "type": "date",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 1
+        },
+        {
+          "name": "ec_enddate",
+          "label": "End date",
+          "type": "date",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 2
+        },
+        {
+          "name": "ec_supervisorname",
+          "label": "Supervisor name",
+          "type": "text",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 3
+        },
+        {
+          "name": "ec_supervisoremail",
+          "label": "Supervisor email",
+          "type": "email",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 4
+        }
+      ],
+      "createEndpointIds": [
+        "submit_placement"
+      ],
+      "updateEndpointIds": [
+        "update_placement"
+      ]
+    },
+    {
+      "type": "form",
+      "id": "placement_role",
+      "name": "About the role",
+      "entity": "ec_placement",
+      "layout": "form",
+      "messagingEnabled": false,
+      "mediaEnabled": false,
+      "sections": [
+        {
+          "id": "main",
+          "label": "About the role",
+          "order": 1
+        }
+      ],
+      "fields": [
+        {
+          "name": "ec_roledescription",
+          "label": "What will you be doing?",
+          "type": "textarea",
+          "section": "main",
+          "crmField": true,
+          "required": true,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 1
+        },
+        {
+          "name": "ec_ispaid",
+          "label": "Is it paid?",
+          "type": "boolean",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 2
+        }
+      ],
+      "createEndpointIds": [
+        "submit_placement"
+      ],
+      "updateEndpointIds": [
+        "update_placement"
+      ]
+    },
+    {
+      "type": "list",
+      "id": "my_placements_list",
+      "name": "My placements",
+      "entity": "ec_placement",
+      "layout": "detailed",
+      "customerField": "ec_studentid",
+      "titleField": "ec_placementname",
+      "subtitleField": "ec_roletitle",
+      "dateField": "ec_startdate",
+      "allowCreate": false,
+      "detailScreenId": "placement_detail",
+      "iconField": "statuscode",
+      "defaultIcon": "briefcase",
+      "defaultIconColor": "#0F766E"
+    },
+    {
+      "type": "record",
+      "id": "placement_detail",
+      "name": "Placement",
+      "entity": "ec_placement",
+      "layout": "detail",
+      "titleField": "ec_placementname",
+      "subtitleField": "ec_roletitle",
+      "timelineEnabled": false,
+      "messagingEnabled": false,
+      "mediaEnabled": false,
+      "actionEndpointIds": [],
+      "sections": [
+        {
+          "id": "main",
+          "label": "Placement",
+          "order": 1
+        }
+      ],
+      "fields": [
+        {
+          "name": "ec_employername",
+          "label": "Employer",
+          "type": "text",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 1
+        },
+        {
+          "name": "ec_roletitle",
+          "label": "Role",
+          "type": "text",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 2
+        },
+        {
+          "name": "ec_startdate",
+          "label": "Starts",
+          "type": "date",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 3
+        },
+        {
+          "name": "ec_enddate",
+          "label": "Ends",
+          "type": "date",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 4
+        },
+        {
+          "name": "ec_supervisorname",
+          "label": "Supervisor",
+          "type": "text",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 5
+        },
+        {
+          "name": "ec_offerletter",
+          "label": "Offer letter",
+          "type": "file",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 6,
+          "fileConfig": {
+            "maxFiles": 1,
+            "maxFileSize": 10485760
+          }
+        },
+        {
+          "name": "ec_insurancecert",
+          "label": "Insurance certificate",
+          "type": "file",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 7,
+          "fileConfig": {
+            "maxFiles": 1,
+            "maxFileSize": 10485760
+          }
+        },
+        {
+          "name": "ec_dbscheck",
+          "label": "DBS check",
+          "type": "file",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 8,
+          "fileConfig": {
+            "maxFiles": 1,
+            "maxFileSize": 10485760
+          }
+        },
+        {
+          "name": "ec_learningagreement",
+          "label": "Learning agreement",
+          "type": "file",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 9,
+          "fileConfig": {
+            "maxFiles": 1
+          }
+        },
+        {
+          "name": "ec_finalreport",
+          "label": "Your reflective report",
+          "type": "textarea",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 10,
+          "maxLength": 20000
+        },
+        {
+          "name": "ec_outcome",
+          "label": "Outcome",
+          "type": "optionset",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 11,
+          "options": [
+            {
+              "value": "1",
+              "label": "Passed",
+              "order": 1
+            },
+            {
+              "value": "2",
+              "label": "Not passed",
+              "order": 2
+            },
+            {
+              "value": "3",
+              "label": "Withdrawn",
+              "order": 3
+            },
+            {
+              "value": "4",
+              "label": "Not approved",
+              "order": 4
+            }
+          ]
+        }
+      ],
+      "journey": {
+        "id": "placement",
+        "name": "Placement year",
+        "entity": "ec_placement",
+        "defaultMessage": "We're looking at your placement.",
+        "defaultContactAction": "waiting",
+        "stages": [
+          {
+            "id": "not_approved",
+            "label": "Not approved",
+            "order": 0,
+            "pathRole": "terminal",
+            "activeWhen": "ec_outcome == 4",
+            "completeWhen": "isEmpty(createdon)",
+            "message": "We couldn't approve this placement. Your placements team will explain why and what you can do next.",
+            "contactAction": "none"
+          },
+          {
+            "id": "withdrawn",
+            "label": "Withdrawn",
+            "order": 0,
+            "pathRole": "terminal",
+            "activeWhen": "ec_outcome == 3",
+            "completeWhen": "isEmpty(createdon)",
+            "message": "This placement was withdrawn.",
+            "contactAction": "none"
+          },
+          {
+            "id": "proposed",
+            "label": "Proposed",
+            "order": 1,
+            "activeWhen": "isEmpty(createdon)",
+            "completeWhen": "hasValue(createdon)",
+            "message": "",
+            "dateField": "createdon"
+          },
+          {
+            "id": "checking",
+            "label": "Employer check",
+            "order": 2,
+            "activeWhen": "isEmpty(ec_vettedon)",
+            "completeWhen": "hasValue(ec_vettedon)",
+            "message": "We've got your proposal. We're confirming {ec_employername}'s insurance and health and safety.",
+            "contactAction": "waiting",
+            "dateField": "ec_vettedon",
+            "showFields": [
+              "ec_employername",
+              "ec_roletitle",
+              "ec_startdate",
+              "ec_enddate",
+              "ec_supervisorname"
+            ],
+            "readOnlyFields": [
+              "ec_employername",
+              "ec_roletitle",
+              "ec_startdate",
+              "ec_enddate",
+              "ec_supervisorname"
+            ]
+          },
+          {
+            "id": "documents",
+            "label": "Documents",
+            "order": 3,
+            "activeWhen": "hasValue(ec_vettedon) AND isEmpty(ec_documentscompleteon)",
+            "completeWhen": "hasValue(ec_documentscompleteon)",
+            "message": "We need three documents: your offer letter, insurance certificate and DBS check.",
+            "contactAction": "action_required",
+            "dateField": "ec_documentscompleteon",
+            "showFields": [
+              "ec_offerletter",
+              "ec_insurancecert",
+              "ec_dbscheck"
+            ]
+          },
+          {
+            "id": "agreement",
+            "label": "Learning agreement",
+            "order": 4,
+            "activeWhen": "hasValue(ec_documentscompleteon) AND isEmpty(ec_agreementsignedon)",
+            "completeWhen": "hasValue(ec_agreementsignedon)",
+            "message": "Read your learning agreement, then confirm you've signed it.",
+            "contactAction": "action_required",
+            "dateField": "ec_agreementsignedon",
+            "showFields": [
+              "ec_learningagreement"
+            ],
+            "readOnlyFields": [
+              "ec_learningagreement"
+            ],
+            "action": {
+              "type": "confirm",
+              "label": "I've signed it",
+              "endpointId": "sign_agreement",
+              "confirmMessage": "Confirm you have read your learning agreement and signed it."
+            }
+          },
+          {
+            "id": "approval",
+            "label": "Final approval",
+            "order": 5,
+            "activeWhen": "hasValue(ec_agreementsignedon) AND isEmpty(ec_approvedon)",
+            "completeWhen": "hasValue(ec_approvedon)",
+            "message": "Thanks for signing. We're giving your placement its final approval.",
+            "contactAction": "waiting",
+            "dateField": "ec_approvedon"
+          },
+          {
+            "id": "approved",
+            "label": "Approved",
+            "order": 6,
+            "activeWhen": "hasValue(ec_approvedon) AND isFuture(ec_startdate)",
+            "completeWhen": "hasValue(ec_approvedon) AND NOT isFuture(ec_startdate)",
+            "message": "You're all set. Your placement starts soon.",
+            "contactAction": "none",
+            "showFields": [
+              "ec_startdate"
+            ],
+            "readOnlyFields": [
+              "ec_startdate"
+            ]
+          },
+          {
+            "id": "on_placement",
+            "label": "On placement",
+            "order": 7,
+            "activeWhen": "hasValue(ec_approvedon) AND NOT isFuture(ec_startdate) AND isFuture(ec_enddate)",
+            "completeWhen": "isPast(ec_enddate) OR hasValue(ec_finalreportreceivedon)",
+            "message": "Three check-ins across the year. We'll ask when each is due.",
+            "contactAction": "none",
+            "action": {
+              "type": "navigate",
+              "label": "See my check-ins",
+              "screenId": "my_checkins_list"
+            }
+          },
+          {
+            "id": "final_report",
+            "label": "Final report",
+            "order": 8,
+            "activeWhen": "hasValue(ec_approvedon) AND isPast(ec_enddate) AND isEmpty(ec_finalreportreceivedon)",
+            "completeWhen": "hasValue(ec_finalreportreceivedon)",
+            "message": "One last thing: your reflective report on the year.",
+            "contactAction": "action_required",
+            "dateField": "ec_finalreportreceivedon",
+            "showFields": [
+              "ec_finalreport"
+            ]
+          },
+          {
+            "id": "report_received",
+            "label": "Report received",
+            "order": 9,
+            "activeWhen": "hasValue(ec_finalreportreceivedon) AND isEmpty(ec_outcome)",
+            "completeWhen": "hasValue(ec_outcome)",
+            "message": "Thanks. Your tutor will record the outcome.",
+            "contactAction": "waiting"
+          },
+          {
+            "id": "completed",
+            "label": "Completed",
+            "order": 10,
+            "activeWhen": "ec_outcome == 1 OR ec_outcome == 2",
+            "completeWhen": "ec_outcome == 1 OR ec_outcome == 2",
+            "message": "Placement complete. Your outcome is recorded.",
+            "contactAction": "none",
+            "showFields": [
+              "ec_outcome"
+            ],
+            "readOnlyFields": [
+              "ec_outcome"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "list",
+      "id": "my_checkins_list",
+      "name": "My check-ins",
+      "entity": "ec_placementcheckin",
+      "layout": "detailed",
+      "customerField": "ec_studentid",
+      "titleField": "ec_placementcheckinname",
+      "subtitleField": "ec_placementid",
+      "dateField": "ec_duedate",
+      "allowCreate": false,
+      "detailScreenId": "checkin_detail",
+      "iconField": "statuscode",
+      "defaultIcon": "clipboard-text",
+      "defaultIconColor": "#C2410C"
+    },
+    {
+      "type": "record",
+      "id": "checkin_detail",
+      "name": "Check-in",
+      "entity": "ec_placementcheckin",
+      "layout": "detail",
+      "titleField": "ec_placementcheckinname",
+      "subtitleField": "ec_placementid",
+      "timelineEnabled": false,
+      "messagingEnabled": false,
+      "mediaEnabled": false,
+      "actionEndpointIds": [],
+      "sections": [
+        {
+          "id": "main",
+          "label": "Check-in",
+          "order": 1
+        }
+      ],
+      "fields": [
+        {
+          "name": "ec_duedate",
+          "label": "Due",
+          "type": "date",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 1
+        },
+        {
+          "name": "ec_response",
+          "label": "How has the placement been this term?",
+          "type": "textarea",
+          "section": "main",
+          "crmField": true,
+          "required": false,
+          "showOnCreate": true,
+          "showOnView": true,
+          "order": 2,
+          "maxLength": 4000
+        }
+      ],
+      "journey": {
+        "id": "checkin",
+        "name": "Check-in",
+        "entity": "ec_placementcheckin",
+        "defaultMessage": "We'll let you know when this is due.",
+        "defaultContactAction": "none",
+        "stages": [
+          {
+            "id": "overdue",
+            "label": "Overdue",
+            "order": 0,
+            "pathRole": "exception",
+            "appliesWhen": "isPast(ec_duedate) AND isEmpty(ec_submittedon)",
+            "activeWhen": "isPast(ec_duedate) AND isEmpty(ec_submittedon)",
+            "completeWhen": "hasValue(ec_submittedon)",
+            "message": "This is past its due date. Tell us how it's going as soon as you can.",
+            "contactAction": "action_required",
+            "showFields": [
+              "ec_response"
+            ]
+          },
+          {
+            "id": "not_open",
+            "label": "Not due yet",
+            "order": 1,
+            "activeWhen": "isFuture(ec_openson) AND isEmpty(ec_submittedon)",
+            "completeWhen": "isPast(ec_openson) OR hasValue(ec_submittedon)",
+            "message": "Nothing to do yet. We'll ask you nearer the time.",
+            "contactAction": "none",
+            "showFields": [
+              "ec_duedate"
+            ],
+            "readOnlyFields": [
+              "ec_duedate"
+            ]
+          },
+          {
+            "id": "due",
+            "label": "Due",
+            "order": 2,
+            "appliesWhen": "NOT (isPast(ec_duedate) AND isEmpty(ec_submittedon))",
+            "activeWhen": "isEmpty(ec_submittedon)",
+            "completeWhen": "hasValue(ec_submittedon)",
+            "message": "Tell us how it's going, then save.",
+            "contactAction": "action_required",
+            "showFields": [
+              "ec_duedate",
+              "ec_response"
+            ],
+            "readOnlyFields": [
+              "ec_duedate"
+            ]
+          },
+          {
+            "id": "submitted",
+            "label": "Submitted",
+            "order": 3,
+            "activeWhen": "hasValue(ec_submittedon) AND isEmpty(ec_reviewedon)",
+            "completeWhen": "hasValue(ec_reviewedon)",
+            "message": "Thanks. Your tutor will read this.",
+            "contactAction": "waiting",
+            "dateField": "ec_submittedon"
+          },
+          {
+            "id": "reviewed",
+            "label": "Reviewed",
+            "order": 4,
+            "activeWhen": "hasValue(ec_reviewedon)",
+            "completeWhen": "hasValue(ec_reviewedon)",
+            "message": "Your tutor has read it.",
+            "contactAction": "none",
+            "dateField": "ec_reviewedon"
+          }
+        ]
+      }
+    }
+  ],
+  "workflows": [
+    {
+      "id": "propose_placement",
+      "name": "Propose a placement",
+      "entity": "ec_placement",
+      "submitEndpointId": "submit_placement",
+      "navigation": [],
+      "completionMessage": "Thanks. We'll check the employer and let you know what we need next.",
+      "steps": [
+        {
+          "id": "employer",
+          "label": "The employer",
+          "order": 1,
+          "type": "form",
+          "formScreenId": "placement_employer"
+        },
+        {
+          "id": "dates",
+          "label": "Dates and supervisor",
+          "order": 2,
+          "type": "form",
+          "formScreenId": "placement_dates"
+        },
+        {
+          "id": "role",
+          "label": "About the role",
+          "order": 3,
+          "type": "form",
+          "formScreenId": "placement_role"
+        },
+        {
+          "id": "review",
+          "label": "Check and submit",
+          "order": 4,
+          "type": "confirmation"
+        }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "submit_wellbeing",
+      "name": "Send",
+      "type": "d365_direct",
+      "uri": "incident",
+      "global": false,
+      "submitMessage": "Thanks. We've got your request and someone will look at it shortly."
+    },
+    {
+      "id": "book_appointment",
+      "name": "Book",
+      "type": "d365_action",
+      "uri": "ec_BookAdvisorAppointment",
+      "global": false,
+      "fieldMappings": {
+        "ec_appointmentslot": "Slot"
+      }
+    },
+    {
+      "id": "advisor_slots",
+      "name": "Advisor slots",
+      "type": "d365_action",
+      "uri": "ec_GetAdvisorSlotsForCase",
+      "global": false
+    },
+    {
+      "id": "submit_placement",
+      "name": "Submit",
+      "type": "d365_direct",
+      "uri": "ec_placement",
+      "global": false,
+      "submitMessage": "Thanks. We'll check the employer and let you know what we need next."
+    },
+    {
+      "id": "update_placement",
+      "name": "Save",
+      "type": "d365_direct",
+      "uri": "ec_placement",
+      "global": false
+    },
+    {
+      "id": "sign_agreement",
+      "name": "Sign",
+      "type": "d365_action",
+      "uri": "ec_SignLearningAgreement",
+      "global": false
+    },
+    {
+      "id": "update_checkin",
+      "name": "Save",
+      "type": "d365_direct",
+      "uri": "ec_placementcheckin",
+      "global": false
+    }
+  ]
+}

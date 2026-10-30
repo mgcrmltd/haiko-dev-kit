@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Haiko plugin preview",
+    "slug": "haiko-plugin-preview",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true
+  }
+}

@@ -1,0 +1,253 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mgcrm-haiko-portal.azurewebsites.net/api/v1/schemas/security-manifest.schema.json",
+  "title": "Haiko security manifest",
+  "$ref": "#/definitions/HaikoSecurityManifest",
+  "definitions": {
+    "HaikoSecurityManifest": {
+      "type": "object",
+      "properties": {
+        "entities": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/HaikoEntityPolicy"
+          },
+          "description": "One policy per D365 entity (logical name) the app touches. Anything not listed is refused."
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoSecurityEndpoint"
+          },
+          "description": "Submit and action endpoints the app may call."
+        },
+        "proxies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HaikoProxyDefinition"
+          },
+          "description": "Outside services the app may call through the API, so their keys stay on the server (#1832)."
+        }
+      },
+      "required": [
+        "entities",
+        "endpoints"
+      ],
+      "additionalProperties": false,
+      "description": "Security manifest (#1879): what the runtime API lets a signed-in contact read, create and update, and which endpoints and outside services the app may call. The runtime API enforces it (Haiko.Utils/SecurityManifest/ SecurityManifest.cs is the model it loads); this is the same shape for Studio, the Dev Kit and anything else that writes one.\n\nPublished to App Configuration as `haiko/{appId}/security-manifest`, by a person in Haiko Studio."
+    },
+    "HaikoEntityPolicy": {
+      "type": "object",
+      "properties": {
+        "customerField": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The lookup that ties a record to a contact, e.g. \"customerid\" or \"ec_studentid\". Null for shared content every contact may see."
+        },
+        "read": {
+          "type": "string",
+          "enum": [
+            "own",
+            "all",
+            "none"
+          ],
+          "description": "\"own\": the contact's own records. \"all\": any signed-in contact. \"none\": not readable."
+        },
+        "create": {
+          "type": "boolean",
+          "description": "Whether contacts may create records of this entity."
+        },
+        "update": {
+          "type": "string",
+          "enum": [
+            "own",
+            "none"
+          ],
+          "description": "\"own\": the contact may update their own records. \"none\": no updates."
+        },
+        "allowedFields": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Comma-separated fields returned to the app; omitted, empty or \"*\" means all. The customerField is always included when read is \"own\"."
+        }
+      },
+      "required": [
+        "customerField",
+        "read",
+        "create",
+        "update"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoSecurityEndpoint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "d365_direct",
+            "d365_action",
+            "logic_app"
+          ]
+        },
+        "action": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "d365_action: the Custom API / action name."
+        },
+        "uri": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "logic_app: the URL called."
+        },
+        "entity": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "d365_direct: the entity written to."
+        },
+        "customerField": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The lookup set to the signed-in contact on submit."
+        },
+        "submitMessage": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Shown to the contact after a successful submit."
+        },
+        "fieldMappings": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "App field name to D365 field name."
+        },
+        "writableFields": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The only fields a submit may carry; anything else is refused. Omitted means unrestricted, so set it."
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "HaikoProxyDefinition": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "baseUrl": {
+          "type": "string",
+          "description": "https base URL; request paths are appended and may not leave it."
+        },
+        "allowedPaths": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Path prefixes allowed under baseUrl, e.g. \"/find/\". Omitted means any."
+        },
+        "methods": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "GET",
+                  "POST"
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "GET and/or POST. Omitted means both."
+        },
+        "secretName": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Key Vault secret (or Proxy:Secrets:{name} setting) sent with every call."
+        },
+        "secretHeader": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Header the secret goes in, e.g. \"api-key\" or \"Authorization\"."
+        },
+        "secretPrefix": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Put before the secret, e.g. \"Bearer \"."
+        },
+        "timeoutMs": {
+          "type": "number",
+          "default": 10000
+        },
+        "maxResponseBytes": {
+          "type": "number",
+          "default": 1000000
+        },
+        "rateLimitPerMinute": {
+          "type": "number",
+          "default": 30
+        }
+      },
+      "required": [
+        "id",
+        "baseUrl"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

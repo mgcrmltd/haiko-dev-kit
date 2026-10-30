@@ -1,0 +1,122 @@
+{
+  "entities": {
+    "incident": {
+      "customerField": "customerid",
+      "read": "own",
+      "update": "own",
+      "create": true
+    },
+    "ec_placement": {
+      "customerField": "ec_studentid",
+      "read": "own",
+      "update": "own",
+      "create": true
+    },
+    "ec_placementcheckin": {
+      "customerField": "ec_studentid",
+      "read": "own",
+      "update": "own",
+      "create": false
+    }
+  },
+  "endpoints": [
+    {
+      "id": "submit_wellbeing",
+      "type": "d365_direct",
+      "entity": "incident",
+      "customerField": "customerid",
+      "submitMessage": "Thanks. We've got your request and someone will look at it shortly.",
+      "writableFields": [
+        "ec_category",
+        "description",
+        "ec_urgency",
+        "ec_relatedrequestid",
+        "ec_consentgiven"
+      ]
+    },
+    {
+      "id": "book_appointment",
+      "type": "d365_action",
+      "entity": "incident",
+      "action": "ec_BookAdvisorAppointment",
+      "fieldMappings": {
+        "ec_appointmentslot": "Slot"
+      },
+      "writableFields": [
+        "ec_appointmentslot"
+      ]
+    },
+    {
+      "id": "advisor_slots",
+      "type": "d365_action",
+      "entity": "incident",
+      "action": "ec_GetAdvisorSlotsForCase"
+    },
+    {
+      "id": "submit_placement",
+      "type": "d365_direct",
+      "entity": "ec_placement",
+      "customerField": "ec_studentid",
+      "submitMessage": "Thanks. We'll check the employer and let you know what we need next.",
+      "writableFields": [
+        "ec_employername",
+        "ec_employeraddress",
+        "ec_roletitle",
+        "ec_startdate",
+        "ec_enddate",
+        "ec_supervisorname",
+        "ec_supervisoremail",
+        "ec_roledescription",
+        "ec_ispaid"
+      ]
+    },
+    {
+      "id": "update_placement",
+      "type": "d365_direct",
+      "entity": "ec_placement",
+      "customerField": "ec_studentid",
+      "writableFields": [
+        "ec_finalreport"
+      ]
+    },
+    {
+      "id": "sign_agreement",
+      "type": "d365_action",
+      "entity": "ec_placement",
+      "action": "ec_SignLearningAgreement",
+      "writableFields": []
+    },
+    {
+      "id": "update_checkin",
+      "type": "d365_direct",
+      "entity": "ec_placementcheckin",
+      "customerField": "ec_studentid",
+      "writableFields": [
+        "ec_response"
+      ]
+    },
+    {
+      "id": "get_advisor_slots",
+      "type": "d365_action",
+      "action": "ec_GetAdvisorSlots",
+      "customerField": "ContactId"
+    },
+    {
+      "id": "get_advisor_slots_none",
+      "type": "d365_action",
+      "action": "ec_GetAdvisorSlotsNone",
+      "customerField": "ContactId"
+    },
+    {
+      "id": "get_advisor_slots_broken",
+      "type": "d365_action",
+      "action": "ec_GetAdvisorSlotsDoesNotExist",
+      "customerField": "ContactId"
+    },
+    {
+      "id": "book_appointment_direct",
+      "type": "d365_direct",
+      "entity": "contact"
+    }
+  ]
+}

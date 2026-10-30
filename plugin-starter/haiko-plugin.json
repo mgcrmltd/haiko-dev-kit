@@ -1,0 +1,36 @@
+{
+  "id": "com.example.my-plugin",
+  "version": "0.1.0",
+  "displayName": "My plugin",
+  "description": "Starter: one sample per slot. Rename the id, then make it yours.",
+  "author": "Your name",
+  "sdk": "^0.1.0",
+  "slots": [
+    {
+      "kind": "screen",
+      "export": "MyScreen",
+      "name": "My screen",
+      "config": [{ "key": "heading", "label": "Heading", "type": "string", "required": true }]
+    },
+    {
+      "kind": "widget",
+      "export": "MyWidget",
+      "name": "My widget",
+      "config": [{ "key": "screenId", "label": "Screen to open", "type": "string" }]
+    },
+    {
+      "kind": "field",
+      "export": "MyField",
+      "name": "My field",
+      "valueType": "string"
+    },
+    {
+      "kind": "step",
+      "export": "MyStep",
+      "name": "My wizard step"
+    }
+  ],
+  "data": {
+    "read": { "incident": ["title", "statecode"] }
+  }
+}
