@@ -4,7 +4,7 @@ Build a Haiko app for your Dynamics 365 contacts with an AI coding agent.
 
 Clone this repo, open it in Claude Code (or another agent that reads `AGENTS.md`), and say what you want:
 
-> "Set up my machine." · "Analyse my CRM." · "Build my app." · "Write the security manifest." · "I need a plugin that…"
+> "Set up my machine." · "Analyse my CRM." · "Build my app." · "Write the security manifest." · "I need a plugin that…" · "Draw my app."
 
 The agent uses the skills in this repo to look at your CRM, ask you the right questions, and build your app in Haiko Studio. You stay in charge: you answer the questions, review what it proposes, and you publish.
 
@@ -17,6 +17,7 @@ The agent uses the skills in this repo to look at your CRM, ask you the right qu
 | **App builder** | Starts a new app in Haiko Studio, or continues one, from that analysis. Checks it and saves it as a draft you can see in Studio's Preview. |
 | **Security** | Works out the least each screen needs to see, and writes the security manifest. You review it and publish it in Studio. |
 | **Plugins** | Designs, builds and tests a plugin when the app needs something configuration can't do. |
+| **Diagrams** | Draws the app as one draw.io file: screens and navigation, architecture down to the CRM's plugins and flows, each journey and each multi-step form. |
 
 ## Your data
 
@@ -57,6 +58,7 @@ scripts/             Python, standard library only:
   crmcheck.py          checks every CRM name an app uses against the CRM
   manifest.py          proposes a least-privilege security manifest, with reasons
   studio.py            Haiko Studio: pull, validate, create, save drafts, preview
+  diagram.py           draws an app as a draw.io file, a tab per diagram
 schemas/             JSON Schemas for the app definition and security manifest
 examples/            a complete app and manifest to learn from
 plugin-starter/      the starting point for a plugin (needs Node 20)

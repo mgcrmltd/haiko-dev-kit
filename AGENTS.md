@@ -17,6 +17,7 @@ Skills live in `.claude/skills/<name>/SKILL.md`. Read the whole SKILL.md before 
 | create or change an app, screens, journeys, navigation | `haiko-app-builder` |
 | the security manifest, "who can see what", least privilege | `haiko-security` |
 | something configuration can't do: a custom screen, widget, field or wizard step | `haiko-plugins` |
+| a diagram, "draw my app", draw.io, explain how it fits together | `haiko-diagrams` |
 
 Order for a new app: setup → CRM analysis → app builder → security. Plugins at
 any point after the app exists. If `workspace/<app>/crm-profile.md` is missing,
@@ -54,3 +55,4 @@ All Python, standard library only. Run them with `python` on Windows (or `py`) a
 - `scripts/doctor.py`: checks the machine, the CRM sign-in and the Studio key
 - `scripts/crm.py`: read-only CRM metadata (`python scripts/crm.py --help`)
 - `scripts/studio.py`: Haiko Studio API: get, validate, save draft (`--help`)
+- `scripts/diagram.py`: draws an app as a draw.io file, a tab per diagram (`--help`)
