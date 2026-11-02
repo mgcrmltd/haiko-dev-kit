@@ -34,8 +34,8 @@ The kit is built so that you can say yes to it in a security review.
 You need **Python 3.11 or later** (3.12 recommended), the **Azure CLI** and **Git**. For plugins, also **Node.js 20**. The setup skill installs and checks all of these. Ask your agent to "set up my machine", or follow [`.claude/skills/haiko-setup/SKILL.md`](.claude/skills/haiko-setup/SKILL.md) yourself.
 
 ```bash
-git clone https://github.com/mgcrmltd/pwr-ntv-dev-kit.git
-cd pwr-ntv-dev-kit
+git clone https://github.com/mgcrmltd/haiko-dev-kit.git
+cd haiko-dev-kit
 python scripts/doctor.py --org https://yourorg.crm11.dynamics.com    # on macOS: python3
 ```
 
