@@ -55,4 +55,5 @@ All Python, standard library only. Run them with `python` on Windows (or `py`) a
 - `scripts/doctor.py`: checks the machine, the CRM sign-in and the Studio key
 - `scripts/crm.py`: read-only CRM metadata (`python scripts/crm.py --help`)
 - `scripts/studio.py`: Haiko Studio API: get, validate, save draft (`--help`)
+- `scripts/assess.py`: assesses a security manifest against the CRM's contact lookups (`--help`)
 - `scripts/diagram.py`: draws an app as a draw.io file, a tab per diagram (`--help`)

@@ -3,7 +3,7 @@
     python scripts/crm.py whoami
     python scripts/crm.py solutions
     python scripts/crm.py entities [--custom] [--solution <uniquename>]
-    python scripts/crm.py entity <logicalname>          fields, option values, lookups
+    python scripts/crm.py entity <logicalname>          fields, option values, lookups, text lengths
     python scripts/crm.py contact-paths <logicalname>   every way a record leads to a contact
     python scripts/crm.py processes [--entity <name>]   BPF stages, cloud flows, classic workflows
     python scripts/crm.py plugin-steps [--entity <name>]
@@ -130,6 +130,11 @@ def entity(dv: Dataverse, args):
     for cast in ("PicklistAttributeMetadata", "MultiSelectPicklistAttributeMetadata", "StatusAttributeMetadata", "StateAttributeMetadata"):
         for a in dv.all(base + f"/Attributes/Microsoft.Dynamics.CRM.{cast}?$select=LogicalName&$expand=OptionSet($select=Options)"):
             opts[a["LogicalName"]] = options(a.get("OptionSet"))
+    # The most characters a text column holds; an app's text field must not allow more.
+    lengths = {}
+    for cast in ("StringAttributeMetadata", "MemoAttributeMetadata"):
+        for a in dv.all(base + f"/Attributes/Microsoft.Dynamics.CRM.{cast}?$select=LogicalName,MaxLength"):
+            lengths[a["LogicalName"]] = a.get("MaxLength")
     fields = []
     for a in sorted(attrs, key=lambda a: a["LogicalName"]):
         f = {"name": a["LogicalName"], "label": label(a.get("DisplayName")),
@@ -140,6 +145,8 @@ def entity(dv: Dataverse, args):
             f["targets"] = lookups[a["LogicalName"]]
         if a["LogicalName"] in opts:
             f["options"] = opts[a["LogicalName"]]
+        if lengths.get(a["LogicalName"]):
+            f["maxLength"] = lengths[a["LogicalName"]]
         fields.append(f)
     return {"logicalName": e["LogicalName"], "displayName": label(e.get("DisplayName")),
             "pluralName": label(e.get("DisplayCollectionName")), "entitySetName": e["EntitySetName"],

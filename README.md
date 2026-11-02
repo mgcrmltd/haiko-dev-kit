@@ -57,6 +57,7 @@ scripts/             Python, standard library only:
   crm.py               read-only CRM metadata (entities, contact paths, processes, counts)
   crmcheck.py          checks every CRM name an app uses against the CRM
   manifest.py          proposes a least-privilege security manifest, with reasons
+  assess.py            assesses a manifest against every contact and account lookup in the CRM
   studio.py            Haiko Studio: pull, validate, create, save drafts, preview
   diagram.py           draws an app as a draw.io file, a tab per diagram
 schemas/             JSON Schemas for the app definition and security manifest

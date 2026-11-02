@@ -126,6 +126,48 @@
           "type": "number",
           "description": "Border radius for cards/buttons (px)"
         },
+        "appStyle": {
+          "$ref": "#/definitions/HaikoAppStyle",
+          "description": "Visual style for the whole app (#1903). Changes how"
+        },
+        "dividerColor": {
+          "type": "string",
+          "description": "Dividers and decorative borders (default \"#E5E7EB\")"
+        },
+        "subtleColor": {
+          "type": "string",
+          "description": "Disabled fills and faint row separators (default \"#F3F4F6\")"
+        },
+        "inputBorderColor": {
+          "type": "string",
+          "description": "Borders of interactive controls; keep 3:1 against the surface (default \"#9CA3AF\")"
+        },
+        "inputFillColor": {
+          "type": "string",
+          "description": "Fill of inputs in the Bold style (default \"#EEF2F6\")"
+        },
+        "focusColor": {
+          "type": "string",
+          "description": "Focus ring (default \"#1A73E8\")"
+        },
+        "inactiveColor": {
+          "type": "string",
+          "description": "Upcoming steps in progress indicators (default \"#D1D5DB\")"
+        },
+        "warningSurfaceColor": {
+          "type": "string",
+          "description": "\"Waiting\" badge fill and text (defaults \"#FEF3C7\" / \"#92400E\")"
+        },
+        "onWarningSurfaceColor": {
+          "type": "string"
+        },
+        "errorSurfaceColor": {
+          "type": "string",
+          "description": "\"Action required\" badge fill and text (defaults \"#FEE2E2\" / \"#991B1B\")"
+        },
+        "onErrorSurfaceColor": {
+          "type": "string"
+        },
         "fontFamily": {
           "type": "string",
           "description": "Font family (optional -- uses system default if not set)"
@@ -164,7 +206,14 @@
         "warningColor",
         "borderRadius"
       ],
-      "additionalProperties": false,
+      "additionalProperties": false
+    },
+    "HaikoAppStyle": {
+      "type": "string",
+      "enum": [
+        "classic",
+        "bold"
+      ],
       "description": "Theme configuration for the generated app. Controls colours, fonts, and basic visual styling."
     },
     "HaikoAuthConfig": {

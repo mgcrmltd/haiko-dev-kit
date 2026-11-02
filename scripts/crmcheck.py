@@ -3,7 +3,8 @@
     python scripts/crmcheck.py --definition workspace/<app>/app-definition.json [--manifest workspace/<app>/security-manifest.json]
 
 Studio can't see your CRM, so it checks an app's shape; this checks its names:
-entities, fields, option values and the fields journey predicates use, plus the
+entities, fields, option values, text fields' maxLength against the column's
+length and the fields journey predicates use, plus the
 manifest's customer fields (they must be lookups to contact) and allowed or
 writable fields. Read-only, metadata only (it uses crm.py). Exit 1 on any problem.
 """
@@ -20,6 +21,7 @@ import kit
 
 FUNCTIONS = {"isEmpty", "hasValue", "isTrue", "isFalse", "contains", "isPast", "isFuture", "AND", "OR", "NOT", "true", "false", "null"}
 SYSTEM = {"createdon", "modifiedon", "statecode", "statuscode", "ownerid"}
+TEXT_TYPES = {"text", "textarea", "email", "phone", "url"}
 
 
 class Metadata:
@@ -77,7 +79,15 @@ def check(md: Metadata, definition: dict | None, manifest: dict | None) -> list[
             continue
         for f in s.get("fields", []):
             if f.get("crmField", True) and f.get("name"):
-                field_ok(f"screens[{s['id']}].fields[{f['name']}]", ent, f["name"], f.get("options"))
+                where = f"screens[{s['id']}].fields[{f['name']}]"
+                field_ok(where, ent, f["name"], f.get("options"))
+                # A text field takes its maxLength from the column, so the CRM never refuses what the app accepted.
+                column = md.field(ent, f["name"]) or {}
+                if f.get("type") in TEXT_TYPES and column.get("maxLength"):
+                    if f.get("maxLength") is None:
+                        problems.append(f"{where}: no maxLength; {ent}.{f['name']} holds {column['maxLength']} characters, so set maxLength to {column['maxLength']} or less")
+                    elif f["maxLength"] > column["maxLength"]:
+                        problems.append(f"{where}: maxLength {f['maxLength']} is more than {ent}.{f['name']} holds ({column['maxLength']})")
         for key in ("titleField", "subtitleField", "dateField", "iconField", "customerField"):
             if s.get(key):
                 field_ok(f"screens[{s['id']}].{key}", ent, s[key])
@@ -137,7 +147,7 @@ def main(argv=None):
     problems = check(Metadata(dv), load(args.definition), load(args.manifest))
     for p in problems:
         print(p)
-    print("CRM names: all found." if not problems else f"\n{len(problems)} name problem(s).")
+    print("CRM names and lengths: all good." if not problems else f"\n{len(problems)} problem(s).")
     sys.exit(1 if problems else 0)
 
 

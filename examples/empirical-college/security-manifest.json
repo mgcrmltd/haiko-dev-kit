@@ -112,11 +112,6 @@
       "type": "d365_action",
       "action": "ec_GetAdvisorSlotsDoesNotExist",
       "customerField": "ContactId"
-    },
-    {
-      "id": "book_appointment_direct",
-      "type": "d365_direct",
-      "entity": "contact"
     }
   ]
 }

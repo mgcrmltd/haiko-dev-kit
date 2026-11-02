@@ -56,6 +56,8 @@ Things to raise even when the script is happy:
 - **`read: "all"`** on anything that isn't obviously public.
 - An endpoint with **no `writableFields`**: it can write any field. The script always sets them, so if one is missing someone removed it.
 
+`assess.py` (step 3) checks all of these against the CRM; raise them even if you haven't run it yet.
+
 ## 3. Check
 
 ```
@@ -67,9 +69,26 @@ python scripts/studio.py validate --app <appId> --manifest workspace/<app>/secur
 `validate` checks the manifest's shape and that it covers every entity and endpoint the app uses.
 Fix everything both report.
 
+Then assess it against the CRM. Always run this, and run it again after every change:
+
+```
+python scripts/assess.py --manifest workspace/<app>/security-manifest.json \
+  --definition workspace/<app>/app-definition.json --out workspace/<app>/security-assessment.md
+```
+
+For each entity it lists every path in the CRM from a record to a contact (direct lookups, via another record,
+through an account) and marks the one the manifest uses. Metadata only: it reads no records.
+- **Problems** (exit 1): a link that isn't a lookup to contact, "own" with no link, anything the app uses that the
+  manifest doesn't cover. Fix them, never by widening a grant.
+- **To confirm**: a link that can also point at an account, another lookup to contact on the same entity,
+  read "all", every column returned, an endpoint that can write any field or set a contact or account lookup.
+  Ask the developer about each one, in their words, unless `decisions.md` already answers it.
+
 ## 4. Explain, then save as a draft
 
-Show the developer `workspace/<app>/security-review.md` in plain words. For each entity: whose records, which fields, and create/update yes or no.
+Show the developer `workspace/<app>/security-assessment.md`: its problems and questions first, then each entity's paths
+with the one in use marked. Then `workspace/<app>/security-review.md` in plain words. For each entity: whose records,
+which fields, and create/update yes or no.
 Walk through it; change what they want changed (and re-run steps 2 and 3).
 
 When they agree:

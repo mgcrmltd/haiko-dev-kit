@@ -56,8 +56,8 @@ Recipes, one per pattern:
 
 | CRM type | `type` | Notes |
 |---|---|---|
-| StringType | `text` (`email`, `phone`, `url` when it is one) | `maxLength` from the metadata |
-| MemoType | `textarea` | |
+| StringType | `text` (`email`, `phone`, `url` when it is one) | `maxLength`: the field's `maxLength` in `crm.py entity` (the column's limit), or less if the developer wants |
+| MemoType | `textarea` | `maxLength` the same way |
 | PicklistType | `optionset` | `options`: `{ value: "<number as string>", label, order }` taken from the metadata, never made up |
 | DateTimeType | `date` or `datetime` | |
 | BooleanType | `boolean` | |

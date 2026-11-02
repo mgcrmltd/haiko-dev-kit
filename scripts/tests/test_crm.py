@@ -90,6 +90,34 @@ class ReadOnly(unittest.TestCase):
             self.assertNotIn(forbidden, src)
 
 
+class TextLengths(unittest.TestCase):
+    """entity gives each text and memo column its MaxLength (#1901), so an app can set maxLength from it."""
+
+    def setUp(self):
+        self._real = kit.http_json
+
+        def fake(method, url, headers, body=None):
+            if "StringAttributeMetadata" in url:
+                return 200, {"value": [{"LogicalName": "title", "MaxLength": 200}]}
+            if "MemoAttributeMetadata" in url:
+                return 200, {"value": [{"LogicalName": "description", "MaxLength": 2000}]}
+            if "/Attributes?" in url:
+                return 200, {"value": [{"LogicalName": n, "AttributeTypeName": {"Value": t}}
+                                       for n, t in (("title", "StringType"), ("description", "MemoType"), ("createdon", "DateTimeType"))]}
+            return 200, CANNED
+        kit.http_json = fake
+
+    def tearDown(self):
+        kit.http_json = self._real
+
+    def test_text_and_memo_columns_carry_max_length(self):
+        out = crm.entity(FakeDataverse(), types.SimpleNamespace(name="incident"))
+        by_name = {f["name"]: f for f in out["fields"]}
+        self.assertEqual(by_name["title"]["maxLength"], 200)
+        self.assertEqual(by_name["description"]["maxLength"], 2000)
+        self.assertNotIn("maxLength", by_name["createdon"])
+
+
 # Shapes taken from Empirical College's real definitions.
 BPF = {"__class": "WorkflowStep:#x", "steps": {"list": [
     {"__class": "EntityStep:#x", "description": "incident", "steps": {"list": [

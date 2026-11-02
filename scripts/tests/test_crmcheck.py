@@ -11,6 +11,7 @@ import crmcheck  # noqa: E402
 ENTITIES = {
     "incident": {"fields": [
         {"name": "title"}, {"name": "createdon"},
+        {"name": "ec_employername", "maxLength": 200}, {"name": "description", "maxLength": 2000},
         {"name": "customerid", "targets": ["account", "contact"]},
         {"name": "ec_advisorid", "targets": ["systemuser"]},
         {"name": "ec_category", "options": [{"value": 1, "label": "Anxiety"}, {"value": 2, "label": "Money"}]},
@@ -52,6 +53,17 @@ class CrmCheck(unittest.TestCase):
         self.assertIn("incident.statuscode has no option value 450000099", found)
         self.assertIn("has no field 'ec_closedon'", found)
         self.assertIn("entity 'ec_nosuchentity' doesn't exist", found)
+
+    def test_text_fields_take_max_length_from_the_column(self):
+        ok = definition(fields=[{"name": "ec_employername", "type": "text", "maxLength": 200},
+                                {"name": "description", "type": "textarea", "maxLength": 500},
+                                {"name": "title", "type": "text"}])  # the column has no length: nothing to check
+        self.assertEqual(self.problems(ok), [])
+        bad = definition(fields=[{"name": "ec_employername", "type": "text"},
+                                 {"name": "description", "type": "textarea", "maxLength": 4000}])
+        found = "\n".join(self.problems(bad))
+        self.assertIn("fields[ec_employername]: no maxLength; incident.ec_employername holds 200 characters", found)
+        self.assertIn("fields[description]: maxLength 4000 is more than incident.description holds (2000)", found)
 
     def test_customer_fields_must_be_lookups_to_contact(self):
         m = {"entities": {"incident": {"customerField": "ec_advisorid", "read": "own"}}, "endpoints": [
