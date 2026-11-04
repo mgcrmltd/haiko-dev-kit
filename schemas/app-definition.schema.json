@@ -127,8 +127,12 @@
           "description": "Border radius for cards/buttons (px)"
         },
         "appStyle": {
-          "$ref": "#/definitions/HaikoAppStyle",
-          "description": "Visual style for the whole app (#1903). Changes how"
+          "type": "string",
+          "description": "Visual style for the whole app (#1903): the id of a style definition (#1907), e.g. \"classic\" or \"bold\". Changes how"
+        },
+        "styleDefinition": {
+          "$ref": "#/definitions/HaikoStyleDefinition",
+          "description": "The definition `appStyle` names, written into the app by the generator so the app draws a style it has never heard of without a library change. When absent (or invalid),"
         },
         "dividerColor": {
           "type": "string",
@@ -140,7 +144,7 @@
         },
         "inputBorderColor": {
           "type": "string",
-          "description": "Borders of interactive controls; keep 3:1 against the surface (default \"#9CA3AF\")"
+          "description": "Borders of interactive controls; keep 3:1 against the surface (default \"#858C98\")"
         },
         "inputFillColor": {
           "type": "string",
@@ -208,13 +212,288 @@
       ],
       "additionalProperties": false
     },
-    "HaikoAppStyle": {
-      "type": "string",
-      "enum": [
-        "classic",
-        "bold"
+    "HaikoStyleDefinition": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "number",
+          "description": "The definition format, currently 1"
+        },
+        "id": {
+          "type": "string",
+          "description": "Stable id an app's theme refers to, e.g. \"bold\". Lowercase letters, digits and dashes"
+        },
+        "name": {
+          "type": "string",
+          "description": "Shown in Studio's style picker"
+        },
+        "description": {
+          "type": "string",
+          "description": "One line for the picker"
+        },
+        "layout": {
+          "$ref": "#/definitions/StyleLayout",
+          "description": "Which variant each part of the app uses"
+        },
+        "accent": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "secondary"
+          ],
+          "description": "The colour of the main action (the home screen's button, a list's + button)"
+        },
+        "largeText": {
+          "$ref": "#/definitions/StyleLargeText",
+          "description": "What each part does at large text; every part in `layout` must have one"
+        },
+        "palette": {
+          "$ref": "#/definitions/StylePalette",
+          "description": "Derive the neutral colours from the primary (#1908). Without it the app uses the theme's colours as set (Classic and Bold)."
+        },
+        "cards": {
+          "$ref": "#/definitions/StyleCards",
+          "description": "How a home card a customer gave a colour or photo looks (#1920)"
+        },
+        "shape": {
+          "$ref": "#/definitions/StyleShape",
+          "description": "Corners and shadows (#1910). Without it, controls use the app's corner radius"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "id",
+        "name",
+        "description",
+        "layout",
+        "accent",
+        "largeText",
+        "cards"
       ],
-      "description": "Theme configuration for the generated app. Controls colours, fonts, and basic visual styling."
+      "additionalProperties": false
+    },
+    "StyleLayout": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "type": "string",
+          "enum": [
+            "bar",
+            "band",
+            "plain"
+          ]
+        },
+        "dashboard": {
+          "type": "string",
+          "enum": [
+            "grid",
+            "tiles",
+            "rows",
+            "ledger",
+            "stack"
+          ]
+        },
+        "filterTabs": {
+          "type": "string",
+          "enum": [
+            "underline",
+            "pills"
+          ]
+        },
+        "listRow": {
+          "type": "string",
+          "enum": [
+            "divided",
+            "raised",
+            "ruled",
+            "ledger",
+            "accented"
+          ]
+        },
+        "wizardProgress": {
+          "type": "string",
+          "enum": [
+            "dots",
+            "segments"
+          ]
+        },
+        "fieldBox": {
+          "type": "string",
+          "enum": [
+            "outline",
+            "filled"
+          ]
+        },
+        "button": {
+          "type": "string",
+          "enum": [
+            "rounded",
+            "pill"
+          ]
+        },
+        "tracker": {
+          "type": "string",
+          "enum": [
+            "dots",
+            "steps",
+            "ledger"
+          ]
+        },
+        "fieldError": {
+          "type": "string",
+          "enum": [
+            "text",
+            "bar"
+          ]
+        }
+      },
+      "required": [
+        "header",
+        "dashboard",
+        "filterTabs",
+        "listRow",
+        "wizardProgress",
+        "fieldBox",
+        "button",
+        "tracker",
+        "fieldError"
+      ],
+      "additionalProperties": false
+    },
+    "StyleLargeText": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "type": "string",
+          "const": "wrap"
+        },
+        "dashboard": {
+          "type": "string",
+          "const": "rows"
+        },
+        "filterTabs": {
+          "type": "string",
+          "const": "scroll"
+        },
+        "listRow": {
+          "type": "string",
+          "const": "wrap"
+        },
+        "wizardProgress": {
+          "type": "string",
+          "const": "caption"
+        },
+        "fieldBox": {
+          "type": "string",
+          "const": "grow"
+        },
+        "button": {
+          "type": "string",
+          "const": "grow"
+        },
+        "tracker": {
+          "type": "string",
+          "const": "wrap"
+        },
+        "fieldError": {
+          "type": "string",
+          "const": "wrap"
+        }
+      },
+      "required": [
+        "header",
+        "dashboard",
+        "filterTabs",
+        "listRow",
+        "wizardProgress",
+        "fieldBox",
+        "button",
+        "tracker",
+        "fieldError"
+      ],
+      "additionalProperties": false
+    },
+    "StylePalette": {
+      "type": "object",
+      "properties": {
+        "backgroundTint": {
+          "type": "number",
+          "description": "Primary mixed into white for the page background"
+        },
+        "inkTint": {
+          "type": "number",
+          "description": "Primary mixed into near-black for body text"
+        },
+        "subtleTint": {
+          "type": "number",
+          "description": "Primary mixed into white for subtle fills (disabled fields, faint separators)"
+        },
+        "dividerFade": {
+          "type": "number",
+          "description": "How far dividers fade from the text colour towards white"
+        },
+        "inputFill": {
+          "type": "string",
+          "enum": [
+            "surface",
+            "subtle"
+          ],
+          "description": "Inputs filled with the subtle colour, or the surface"
+        }
+      },
+      "required": [
+        "backgroundTint",
+        "inkTint",
+        "subtleTint",
+        "dividerFade",
+        "inputFill"
+      ],
+      "additionalProperties": false,
+      "description": "A style's colour settings: how far each neutral leans towards the primary. Fractions 0-1."
+    },
+    "StyleCards": {
+      "type": "object",
+      "properties": {
+        "wash": {
+          "type": "number",
+          "description": "0 to 0.3: how much of a card's colour tints the card"
+        },
+        "photo": {
+          "type": "string",
+          "enum": [
+            "none",
+            "cover"
+          ]
+        }
+      },
+      "required": [
+        "wash",
+        "photo"
+      ],
+      "additionalProperties": false,
+      "description": "Card appearance (#1920). A card's colour is drawn as a pale wash, never a solid fill: `wash` is how much of the colour is mixed into the surface. `photo` is what a card's photo does: \"none\" ignores it, \"cover\" fills the card with it under a dark overlay and shows it as a banner on the screen the card opens, with a form's fields on a rounded sheet over it (#1922)."
+    },
+    "StyleShape": {
+      "type": "object",
+      "properties": {
+        "controlRadius": {
+          "type": "number",
+          "description": "0 to 24"
+        },
+        "surfaceRadius": {
+          "type": "number",
+          "description": "0 to 24"
+        },
+        "shadow": {
+          "type": "string",
+          "enum": [
+            "soft",
+            "none"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "Corners and shadows (#1910). `controlRadius` fixes the corner of buttons, inputs and chips, and `surfaceRadius` of panels (a record's progress, a form's sections), whatever the app's own radius; `shadow: \"none\"` draws cards and rows flat. Each left out keeps today's look."
     },
     "HaikoAuthConfig": {
       "type": "object",
@@ -275,6 +554,14 @@
         "image": {
           "type": "string",
           "description": "Optional image URL (overrides icon)"
+        },
+        "cardColor": {
+          "type": "string",
+          "description": "Optional colour of this item's home card (#1920, hex). Drawn as a pale wash at the style's strength, with the icon full-colour in a stronger circle; text keeps the theme's colour. Unset: the card looks as before."
+        },
+        "cardImage": {
+          "type": "string",
+          "description": "Optional photo for this item's home card (#1920, an image URL). Styles whose cards take photos show it under a dark overlay, and as a banner on the screen the card opens; other styles ignore it. Decorative: screen readers skip it, as the card's label already names it."
         },
         "order": {
           "type": "number",
