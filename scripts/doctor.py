@@ -80,9 +80,9 @@ def signed_in():
     return True
 
 
-def crm():
+def crm(org_arg=None):
     env = kit.load_env()
-    org = env.get("HAIKO_CRM_URL")
+    org = org_arg or env.get("HAIKO_CRM_URL")
     if not org:
         check("CRM URL", False, "HAIKO_CRM_URL isn't set", "Copy .env.example to .env and set HAIKO_CRM_URL to your org, e.g. https://yourorg.crm11.dynamics.com")
         return
@@ -123,10 +123,11 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--offline", action="store_true", help="check tools only")
     ap.add_argument("--json", action="store_true", help="print results as JSON")
+    ap.add_argument("--org", help="Dataverse URL (default: HAIKO_CRM_URL)")
     args = ap.parse_args()
     tools()
     if not args.offline and (shutil.which("az") or shutil.which("az.cmd")) and signed_in():
-        crm()
+        crm(args.org)
     if not args.offline:
         studio()
     failed = [r for r in results if r["status"] == "fail"]
