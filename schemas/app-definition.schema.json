@@ -64,6 +64,10 @@
             "$ref": "#/definitions/HaikoPluginRef"
           },
           "description": "Plugin \"widget\" slots shown on the dashboard, in order"
+        },
+        "homeSummary": {
+          "$ref": "#/definitions/HaikoHomeSummary",
+          "description": "A line at the top of the home screen saying how many records need the contact, summed over the home cards' Needs you counts (#1934). Opt-in: shown only when both texts are set and at least one card counts."
         }
       },
       "required": [
@@ -563,6 +567,18 @@
           "type": "string",
           "description": "Optional photo for this item's home card (#1920, an image URL). Styles whose cards take photos show it under a dark overlay, and as a banner on the screen the card opens; other styles ignore it. Decorative: screen readers skip it, as the card's label already names it."
         },
+        "cardFocus": {
+          "$ref": "#/definitions/PhotoFocus",
+          "description": "Where the subject sits in the card photo (#1925): kept in view however the card is cropped. Default: the centre"
+        },
+        "bannerImage": {
+          "type": "string",
+          "description": "Optional photo for the banner of the screen this item opens (#1925, an image URL). Falls back to the card photo when empty."
+        },
+        "bannerFocus": {
+          "$ref": "#/definitions/PhotoFocus",
+          "description": "Where the subject sits in the banner photo (#1925). Default: the centre"
+        },
         "order": {
           "type": "number",
           "description": "Sort order"
@@ -581,6 +597,23 @@
       ],
       "additionalProperties": false,
       "description": "Navigation item -- maps to D365 hko_menulink entity. Defines what appears in the app's main navigation (side menu or tab bar)."
+    },
+    "PhotoFocus": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "description": "Where the subject sits in a photo, as fractions of its width and height (0 to 1)."
     },
     "HaikoNavTarget": {
       "anyOf": [
@@ -1508,6 +1541,22 @@
         "defaultContactAction": {
           "$ref": "#/definitions/HaikoContactAction",
           "description": "Where an unmatched record sits for list segmentation.\n\nRequired for the same reason: lists bucket by `contactAction`, so a record matching no stage still needs a declared home. Never inferred."
+        },
+        "bucketNames": {
+          "type": "object",
+          "properties": {
+            "none": {
+              "type": "string"
+            },
+            "waiting": {
+              "type": "string"
+            },
+            "action_required": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "description": "What the contact sees each list bucket called (#1927), e.g. `{ action_required: \"Your turn\" }`. A bucket left out keeps its default: Needs you, Waiting on us, Nothing to do. Only the words change -- the app decides a row's tab, icon and count by its contactAction, never by name."
         }
       },
       "required": [
@@ -2004,6 +2053,25 @@
       ],
       "additionalProperties": false,
       "description": "One plugin compiled into an app, at one version"
+    },
+    "HaikoHomeSummary": {
+      "type": "object",
+      "properties": {
+        "needsYou": {
+          "type": "string",
+          "description": "Shown when something needs the contact. `{count}` becomes the number, e.g. \"Needs you: {count}\"."
+        },
+        "allClear": {
+          "type": "string",
+          "description": "Shown when nothing does, e.g. \"You're all up to date\"."
+        }
+      },
+      "required": [
+        "needsYou",
+        "allClear"
+      ],
+      "additionalProperties": false,
+      "description": "The home screen's summary line (#1934). The app owns the words; Haiko adds none."
     }
   }
 }
